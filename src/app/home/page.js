@@ -1,41 +1,15 @@
 'use client';
 import L from 'leaflet';
-import { getRvmLocations } from '@/services/location-service';
-
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useBottle } from '@/context/bottle-count';
+import useFetch from '../../lib/use-fetch';
 
 export default function Page() {
-  const [location, setLocation] = useState([]);
-  // const { bottleCount, points } = useBottle();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const { data: locations, loading, error } = useFetch('/api/rvm-locations');
 
-  useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const fetchedLocations = await getRvmLocations();
-        console.log(fetchedLocations);
-
-        if (Array.isArray(fetchedLocations)) {
-          setLocation(fetchedLocations);
-        } else {
-          setError('Data fetched is not an array.');
-        }
-      } catch (error) {
-        setError(
-          error.message || 'An error occurred while fetching locations.'
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLocations();
-  }, []);
+  console.log('rvm location', locations?.data);
 
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -98,18 +72,18 @@ export default function Page() {
         <div className="bg-bgSecondary rounded-[14px] px-4 py-4 mt-4 h-[140px]">
           <div className="items-center">
             <h1 className="text-text-primary">Botol Terkumpul</h1>
-            <h2 className="text-primary font-semibold text-[16px]">
+            {/* <h2 className="text-primary font-semibold text-[16px]">
               {loading ? '' : bottleCount}Pcs
-            </h2>
+            </h2> */}
           </div>
         </div>
 
         <div className="bg-primary rounded-[14px] px-4 py-4 mt-4 drop-shadow-xl -translate-y-20 h-[70px] flex justify-between">
           <div className="items-center">
             <h1 className="text-bgSecondary">Plastic-In Poin</h1>
-            <h2 className="text-bgSecondary font-semibold text-[16px]">
+            {/* <h2 className="text-bgSecondary font-semibold text-[16px]">
               {points}
-            </h2>
+            </h2> */}
           </div>
           <div className="flex items-center gap-2 pt-6">
             <button className="text-bgSecondary text-xs">Reedem Poin</button>
@@ -133,7 +107,7 @@ export default function Page() {
             Lokasi Terdekat
           </h1>
           <div className="flex gap-4 overflow-x-auto mt-3 scrollbar-hide">
-            {location
+            {(locations?.data || [])
               .map((rvm) => {
                 const distance = currentLocation
                   ? calculateDistance(
@@ -150,16 +124,6 @@ export default function Page() {
                       key={rvm.id}
                       className="w-56 flex-shrink-0 bg-white rounded-[14px] p-4 flex flex-col drop-shadow-md"
                     >
-                      {rvm.image && (
-                        <Image
-                          src={rvm.image}
-                          alt={rvm.name}
-                          width={400}
-                          height={200}
-                          objectFit="cover"
-                          className="rounded-[14px]"
-                        />
-                      )}
                       <div className="mt-2 text-text-primary flex-1 flex flex-col">
                         <h3 className="text-sm font-semibold">{rvm.name}</h3>
                         <div className="flex flex-col gap-3 mt-3 flex-grow">
@@ -215,10 +179,11 @@ export default function Page() {
                     </div>
                   );
                 } else {
-                  return null; // Skip locations beyond 7 km
+                  return null;
                 }
               })
-              .filter(Boolean)}{' '}
+              .filter(Boolean)}
+
             {/* Remove null values */}
           </div>
         </div>

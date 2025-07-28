@@ -1,110 +1,100 @@
-import { db } from '@/app/firebase';
-import {
-  collection,
-  setDoc,
-  doc,
-  getDocs,
-  getDoc,
-  deleteDoc,
-} from 'firebase/firestore';
+import prisma from '@/lib/prisma';
+import { NextResponse } from 'next/server';
 
-export async function POST(req) {
+export async function GET(req) {
   try {
-    const data = await req.json();
-    const { markers } = data;
-    if (!Array.isArray(markers)) {
-      return new Response(
-        JSON.stringify({
-          error: 'Invalid data format. Expected an array of markers.',
-        }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const skip = (page - 1) * limit;
 
-    const rvmCollection = collection(db, 'rvm-locations');
-    const savedMarkers = [];
+    const totalData = await prisma.rvmLocation.count();
 
-    for (const marker of markers) {
-      const { id, name, position, capacity } = marker;
-      if (!id || !name || !position || capacity === undefined) {
-        return new Response(
-          JSON.stringify({
-            error: 'Each marker must include id, name, and position.',
-          }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+    const locations = await prisma.rvmLocation.findMany({
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: {
+        id: true,
+        name: true,
+        position: true,
+        capacity: true,
+        capacityStatus: true,
+        createdAt: true,
 
-      if (typeof capacity != 'number' || capacity < 0 || capacity > 100) {
-        return new Response(
-          JSON.stringify({
-            error: 'Capacity must be a number between 0 and 100.',
-          }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+        // updatedAt: true,
+      },
+    });
 
-      const capacityStatus =
-        capacity >= 90 ? 'full' : capacity >= 50 ? 'almost-full' : 'not-full';
+    const totalPage = Math.ceil(totalData / limit);
 
-      const markerData = {
-        id: id,
-        name: name,
-        capacity: marker,
-        capacityStatus,
-        position: position,
-        createdAt: new Date().toISOString(),
-      };
-
-      await setDoc(doc(rvmCollection, `rvm-${marker.id}`), markerData);
-      savedMarkers.push(markerData);
-    }
-
-    return new Response(
-      JSON.stringify({
-        message: 'RVM data successfully saved to Firestore.',
-        savedMarkers,
-      }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+    return NextResponse.json({
+      code: 200,
+      message: 'Success fetching RVM locations',
+      data: {
+        total_data: totalData,
+        page,
+        limit,
+        total_page: totalPage,
+        data: locations.map((loc) => ({
+          id: loc.id,
+          name: loc.name,
+          position: loc.position,
+          capacity: loc.capacity,
+          capacityStatus: loc.capacityStatus,
+          created_at: loc.createdAt,
+          updated_at: loc.updatedAt,
+        })),
+      },
+    });
   } catch (error) {
-    console.error('Error saving data:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Failed to save data. Please check the server logs.',
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    console.error(error);
+    return NextResponse.json(
+      {
+        code: 500,
+        message: 'Internal server error',
+        data: null,
+      },
+      { status: 500 }
     );
   }
 }
-export async function GET(req) {
-  try {
-    const rvmCollection = collection(db, 'rvm-locations');
-    const snapshot = await getDocs(rvmCollection);
 
-    const locations = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: data.id,
-        name: data.name,
-        capacity: data.capacity,
-        capacityStatus: data.capacityStatus,
-        position: data.position,
-        image: data.image,
-        createdAt: data.createdAt,
-      };
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    const { name, latitude, longitude, status } = body;
+
+    if (!name || latitude == null || longitude == null || !status) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Semua field harus diisi' }),
+        { status: 400 }
+      );
+    }
+
+    const location = await prisma.rvmLocation.create({
+      data: {
+        name,
+        position: {
+          latitude,
+          longitude,
+        },
+        capacity: 0, // atau nilai default
+        capacityStatus: status,
+      },
     });
 
-    return new Response(JSON.stringify({ locations }), {
-      status: 200,
+    return new NextResponse(JSON.stringify(location), {
+      status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error fetching RVM locations:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to fetch RVM locations' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    console.error('POST Error:', error);
+    return new NextResponse(JSON.stringify({ error: 'Server error' }), {
+      status: 500,
+    });
   }
 }
 

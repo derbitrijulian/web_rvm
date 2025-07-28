@@ -17,6 +17,7 @@
     "firebase": "^11.0.2",
     "firebase-admin": "^13.0.2",
     "html5-qrcode": "^2.3.8",
+    "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "leaflet-routing-machine": "^3.2.12",

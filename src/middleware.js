@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export function middleware(req) {
-  const accessToken = req.cookies.get('firebase_token');
+  const accessToken = req.cookies.get('token');
 
   const url = req.nextUrl.clone();
   if (!accessToken) {
@@ -22,5 +22,13 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/home', '/login', '/profil/:path*', '/aktifitas', "/bottlein", "/qr", "/receipt-qr"],
+  matcher: [
+    '/home',
+    '/login',
+    '/profil/:path*',
+    '/aktifitas',
+    '/bottlein',
+    '/qr',
+    '/receipt-qr',
+  ],
 };
