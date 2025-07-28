@@ -103,7 +103,7 @@ export default function Page() {
               height={122.73}
             />
             <div className=" w-[138.44px]">
-              <p className="text-xs font-semibold text-wrap text-center pt-2">
+              <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
                 Lorem epsium, lorem epsium, Lorem Epsium
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function Page() {
               height={122.73}
             />
             <div className=" w-[138.44px]">
-              <p className="text-xs font-semibold text-wrap text-center pt-2">
+              <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
                 Lorem epsium, lorem epsium, Lorem Epsium
               </p>
             </div>
@@ -129,7 +129,7 @@ export default function Page() {
               height={122.73}
             />
             <div className=" w-[138.44px]">
-              <p className="text-xs font-semibold text-wrap text-center pt-2">
+              <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
                 Lorem epsium, lorem epsium, Lorem Epsium
               </p>
             </div>
@@ -142,7 +142,7 @@ export default function Page() {
               height={122.73}
             />
             <div className=" w-[138.44px]">
-              <p className="text-xs font-semibold text-wrap text-center pt-2">
+              <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
                 Lorem epsium, lorem epsium, Lorem Epsium
               </p>
             </div>
@@ -155,7 +155,7 @@ export default function Page() {
               height={122.73}
             />
             <div className=" w-[138.44px]">
-              <p className="text-xs font-semibold text-wrap text-center pt-2">
+              <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
                 Lorem epsium, lorem epsium, Lorem Epsium
               </p>
             </div>
@@ -168,7 +168,7 @@ export default function Page() {
               height={122.73}
             />
             <div className=" w-[138.44px]">
-              <p className="text-xs font-semibold text-wrap text-center pt-2">
+              <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
                 Lorem epsium, lorem epsium, Lorem Epsium
               </p>
             </div>
@@ -181,7 +181,7 @@ export default function Page() {
               height={122.73}
             />
             <div className=" w-[138.44px]">
-              <p className="text-xs font-semibold text-wrap text-center pt-2">
+              <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
                 Lorem epsium, lorem epsium, Lorem Epsium
               </p>
             </div>
@@ -194,7 +194,7 @@ export default function Page() {
               height={122.73}
             />
             <div className=" w-[138.44px]">
-              <p className="text-xs font-semibold text-wrap text-center pt-2">
+              <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
                 Lorem epsium, lorem epsium, Lorem Epsium
               </p>
             </div>

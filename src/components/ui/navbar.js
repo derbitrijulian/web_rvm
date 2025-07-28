@@ -34,7 +34,7 @@ export default function Navbar() {
             className={`flex flex-col items-center ${
               isActive('/home') ? 'text-primary' : 'text-black'
             }`}
-          > 
+          >
             <div>
               <IoHomeOutline className="w-6 h-6" />
             </div>
@@ -71,11 +71,11 @@ export default function Navbar() {
                   </div>
                 </>
               ) : (
-                <div className='grid items-center'>
+                <div className="grid items-center">
                   <div className=" relative inline-flex rounded-full w-20 h-20 bg-primary  items-center justify-center ">
                     <BiNavigation className="text-white w-10 h-10 text-center  " />
                   </div>
-                  <p>navigasi</p>
+                  <p className="text-black font-semibold">Navigasi</p>
                 </div>
               )}
             </div>

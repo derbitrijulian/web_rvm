@@ -5,35 +5,35 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function RedeemGopayPage() {
-  const [bottleCount, setBottleCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // const [bottleCount, setBottleCount] = useState(0);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let interval
-    const fetchBottleData = async () => {
-      try {
-        const response = await fetch('/api/bottle-count');
-        if (!response.ok) {
-          throw new Error('Failed to fetch bottle data');
-        }
-        const data = await response.json();
-        console.log(data.bottleData.bottleCount);
-        setBottleCount(data.bottleData.bottleCount);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   let interval
+  //   const fetchBottleData = async () => {
+  //     try {
+  //       const response = await fetch('/api/bottle-count');
+  //       if (!response.ok) {
+  //         throw new Error('Failed to fetch bottle data');
+  //       }
+  //       const data = await response.json();
+  //       console.log(data.bottleData.bottleCount);
+  //       setBottleCount(data.bottleData.bottleCount);
+  //     } catch (error) {
+  //       setError(error.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchBottleData();
-    interval = setInterval(() => {
-      fetchBottleData();
-    }, 500);
+  //   fetchBottleData();
+  //   interval = setInterval(() => {
+  //     fetchBottleData();
+  //   }, 500);
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
   return (
     <div className="bg-primary h-screen pt-[35px] min-h-screen flex flex-col">
       {/* Header */}

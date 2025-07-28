@@ -20,7 +20,7 @@ export default function Page() {
           <Image src="/svg/notif.svg" alt="notif" width={149} height={193} />
         </div>
         <div className="flex justify-center">
-          <span className="text-center font-bold text-[22px]">
+          <span className="text-center font-bold text-[22px] text-text-primary">
             Tidak ada Notifikasi
             <Link href="/" className="">
               <button className="px-16 py-3 my-12 bg-primary rounded-xl text-white font-semibold text-xl">

@@ -1,122 +1,121 @@
 'use client';
+
 import { Html5Qrcode } from 'html5-qrcode';
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Home() {
+export default function QRScanner() {
+  const router = useRouter();
   const [scanResult, setScanResult] = useState(null);
-  const [scanner, setScanner] = useState(null);
   const [cameras, setCameras] = useState([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
-  const router = useRouter();
-
-  useEffect(() => {
-    const initializeScanner = async () => {
-      const qrReaderId = 'reader';
-
-      if (!document.getElementById(qrReaderId)) {
-        console.warn(`Element with ID '${qrReaderId}' is not available.`);
-        return;
-      }
-
-      const qrScanner = new Html5Qrcode(qrReaderId);
-      setScanner(qrScanner);
-
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(
-          (device) => device.kind === 'videoinput'
-        );
-        setCameras(videoDevices);
-
-        if (videoDevices.length > 0) {
-          startScanning(qrScanner, videoDevices[0].deviceId);
-        } else {
-          console.warn('No cameras found.');
-        }
-      } catch (error) {
-        console.error('Error initializing cameras:', error);
-      }
-    };
-
-    initializeScanner();
-
-    return () => {
-      if (scanner) {
-        scanner
-          .stop()
-          .catch((err) => console.warn('Error stopping scanner:', err));
-        scanner.clear();
-      }
-    };
-  }, []);
-
-  const startScanning = async (qrScanner, deviceId) => {
-    try {
-      await qrScanner.start(
-        { deviceId: { exact: deviceId } },
-        {
-          fps: 5,
-          qrbox: { width: 300, height: 250 },
-        },
-        (decodedText) => {
-          console.log('Decoded Text:', decodedText);
-          setScanResult(decodedText);
-          qrScanner
-            .stop()
-            .catch((err) => console.warn('Error stopping scanner:', err));
-
-          if (isValidUrl(decodedText)) {
-            router.replace(decodedText);
-          } else {
-            alert('Hasil scan bukan URL valid: ' + decodedText);
-          }
-        },
-        (errorMessage) => {
-          console.warn('Scan error:', errorMessage);
-        }
-      );
-    } catch (err) {
-      console.error('Error starting scanner:', err);
-    }
-  };
-
-  const toggleCamera = async () => {
-    if (scanner && cameras.length > 1) {
-      const nextIndex = (currentCameraIndex + 1) % cameras.length;
-      setCurrentCameraIndex(nextIndex);
-      await scanner
-        .stop()
-        .catch((err) => console.warn('Error stopping scanner:', err));
-      startScanning(scanner, cameras[nextIndex].deviceId);
-    } else {
-      console.warn('Cannot toggle camera. Only one camera available.');
-    }
-  };
+  const html5QrcodeScannerRef = useRef(null);
+  const readerRef = useRef(null);
 
   const isValidUrl = (string) => {
     try {
       new URL(string);
       return true;
-    } catch (error) {
+    } catch (_) {
       return false;
     }
   };
 
+  const startScanning = async (deviceId) => {
+    if (!readerRef.current) return;
+
+    const scanner = new Html5Qrcode(readerRef.current.id);
+    html5QrcodeScannerRef.current = scanner;
+
+    try {
+      await scanner.start(
+        { deviceId: { exact: deviceId } },
+        {
+          fps: 5,
+          qrbox: { width: 300, height: 400 },
+        },
+        (decodedText) => {
+          console.log('Decoded:', decodedText);
+          setScanResult(decodedText);
+          scanner.stop().catch((e) => console.warn('Stop error:', e));
+          if (isValidUrl(decodedText)) {
+            router.push(decodedText);
+          } else {
+            alert('Hasil scan bukan URL valid:\n' + decodedText);
+          }
+        },
+        (err) => {
+          console.warn('Scan error:', err);
+        }
+      );
+    } catch (err) {
+      console.error('Start scan error:', err);
+    }
+  };
+
+  const stopScanner = async () => {
+    if (html5QrcodeScannerRef.current) {
+      await html5QrcodeScannerRef.current.stop().catch(() => {});
+      html5QrcodeScannerRef.current.clear();
+      html5QrcodeScannerRef.current = null;
+    }
+  };
+
+  const toggleCamera = async () => {
+    if (cameras.length <= 1) return;
+
+    await stopScanner();
+    const nextIndex = (currentCameraIndex + 1) % cameras.length;
+    setCurrentCameraIndex(nextIndex);
+    startScanning(cameras[nextIndex].deviceId);
+  };
+
+  useEffect(() => {
+    const setupScanner = async () => {
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices.length === 0) {
+          alert('Kamera tidak ditemukan.');
+          return;
+        }
+
+        setCameras(devices);
+        setCurrentCameraIndex(0);
+        startScanning(devices[0].deviceId);
+      } catch (err) {
+        console.error('Camera error:', err);
+        alert('Gagal mengakses kamera.');
+      }
+    };
+
+    setupScanner();
+
+    return () => {
+      stopScanner();
+    };
+  }, []);
+
   return (
     <div className="flex flex-col relative items-center justify-center min-h-screen bg-gray-100">
-      <div id="reader" className="w-full max-w-md bg-gray-300 rounded-md"></div>
-
+      {/* Fullscreen camera */}
+      <div
+        ref={readerRef}
+        id="reader"
+        className="w-full h-full"
+        style={{
+          objectFit: 'cover',
+        }}
+      />
       {scanResult && (
-        <div className="mt-4 p-4 bg-primary border border-green-500 rounded">
-          <p className="text-green-800 font-medium">Hasil Scan:</p>
+        <div className="mt-4 p-4 bg-white border border-green-500 rounded-md shadow-md">
+          <p className="text-green-800 font-semibold">Hasil Scan:</p>
           <p className="text-sm text-gray-800 break-words">{scanResult}</p>
         </div>
       )}
 
-      <div className="rounded-2xl bg-white w-[336px] h-[67px] bottom-0 absolute">
+      <div className="rounded-2xl bg-white w-[336px] h-[67px] bottom-0 absolute shadow-md">
         <div className="flex justify-center gap-[210px] py-4 px-7">
           <div onClick={toggleCamera} className="cursor-pointer">
             <Image

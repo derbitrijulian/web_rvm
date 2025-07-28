@@ -16,7 +16,7 @@ export default function onboardingPage() {
         <h1 className="font-semibold text-primary w-full text-center text-[52.14px] pt-3">
           Plastic - In
         </h1>
-        <p className="text-sm font-normal text-center pt-2 pb-11">
+        <p className="text-sm font-normal text-center pt-2 pb-11 text-text-primary">
           Selamat Datang Di Plastic-In!{' '}
         </p>
       </div>

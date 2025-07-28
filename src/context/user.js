@@ -1,5 +1,4 @@
-
-"use client"
+'use client';
 import { fetchUser } from '@/services/user-service';
 import React, { createContext, useContext, useState } from 'react';
 

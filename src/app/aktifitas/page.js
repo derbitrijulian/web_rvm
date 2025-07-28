@@ -55,7 +55,9 @@ export default function ProfilePage() {
       <div className="bg-bgSecondary h-full rounded-t-[36px] pt-10 px-9 pb-8 mt-3 relative">
         <div className="">
           <div className="flex justify-between">
-            <span className="font-semibold text-sm text-start">April 2024</span>
+            <span className="font-semibold text-sm text-start text-text-primary">
+              April 2024
+            </span>
             <div className="flex justify-end gap-1">
               <Image
                 src="/svg/calendar.svg"
@@ -75,7 +77,9 @@ export default function ProfilePage() {
           <div className="flex justify-start space-x-4 ">
             <div className="bg-secondary w-14 h-[53px] rounded-2xl "></div>
             <div className="grid gap-0">
-              <h1 className="font-medium text-sm">Ambil Poin</h1>
+              <h1 className="font-medium text-sm text-text-primary">
+                Ambil Poin
+              </h1>
               <p className="font-semibold text-gray-500 text-xs">
                 18:27 - April 30
               </p>
@@ -93,7 +97,9 @@ export default function ProfilePage() {
           <div className="flex justify-start space-x-4  ">
             <div className="bg-secondary w-14 h-[53px] rounded-2xl "></div>
             <div className="grid gap-0">
-              <h1 className="font-medium text-sm">Botol Masuk</h1>
+              <h1 className="font-medium text-sm text-text-primary">
+                Botol Masuk
+              </h1>
               <p className="font-semibold text-gray-500 text-xs">
                 17:00 - April 24
               </p>
@@ -111,7 +117,9 @@ export default function ProfilePage() {
           <div className="flex justify-start space-x-4  ">
             <div className="bg-secondary w-14 h-[53px] rounded-2xl "></div>
             <div className="grid gap-0">
-              <h1 className="font-medium text-sm">Ambil Poin</h1>
+              <h1 className="font-medium text-sm text-text-primary">
+                Ambil Poin
+              </h1>
               <p className="font-semibold text-gray-500 text-xs">
                 8:30 - April 15
               </p>
@@ -128,7 +136,9 @@ export default function ProfilePage() {
           <div className="flex justify-start space-x-4  ">
             <div className="bg-secondary w-14 h-[53px] rounded-2xl "></div>
             <div className="grid gap-0">
-              <h1 className="font-medium text-sm">Botol Masuk</h1>
+              <h1 className="font-medium text-sm text-text-primary">
+                Botol Masuk
+              </h1>
               <p className="font-semibold text-gray-500 text-xs">
                 9:30 - April 08
               </p>

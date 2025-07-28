@@ -3,7 +3,6 @@ import { Poppins } from 'next/font/google';
 import ClientLayout from './client-layout';
 import { LocationProvider } from '@/context/location';
 import { UserProvider } from '@/context/user';
-import { BottleProvider } from '@/context/bottle-count';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -22,11 +21,11 @@ export default function RootLayout({ children }) {
       <body className={`${poppins.className} `}>
         <LocationProvider>
           <UserProvider>
-            <BottleProvider>
+            {/* <BottleProvider> */}
               <ClientLayout>
                 <main>{children}</main>
               </ClientLayout>
-            </BottleProvider>
+            {/* </BottleProvider> */}
           </UserProvider>
         </LocationProvider>
       </body>

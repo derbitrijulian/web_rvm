@@ -9,7 +9,7 @@ import { useBottle } from '@/context/bottle-count';
 
 export default function Page() {
   const [location, setLocation] = useState([]);
-  const { bottleCount, points } = useBottle();
+  // const { bottleCount, points } = useBottle();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -98,14 +98,18 @@ export default function Page() {
         <div className="bg-bgSecondary rounded-[14px] px-4 py-4 mt-4 h-[140px]">
           <div className="items-center">
             <h1 className="text-text-primary">Botol Terkumpul</h1>
-            <h2 className="text-primary font-semibold text-[16px]">{loading ? "": bottleCount}Pcs</h2>
+            <h2 className="text-primary font-semibold text-[16px]">
+              {loading ? '' : bottleCount}Pcs
+            </h2>
           </div>
         </div>
 
         <div className="bg-primary rounded-[14px] px-4 py-4 mt-4 drop-shadow-xl -translate-y-20 h-[70px] flex justify-between">
           <div className="items-center">
             <h1 className="text-bgSecondary">Plastic-In Poin</h1>
-            <h2 className="text-bgSecondary font-semibold text-[16px]">{points}</h2>
+            <h2 className="text-bgSecondary font-semibold text-[16px]">
+              {points}
+            </h2>
           </div>
           <div className="flex items-center gap-2 pt-6">
             <button className="text-bgSecondary text-xs">Reedem Poin</button>
@@ -221,7 +225,7 @@ export default function Page() {
 
         {/* News Section */}
         <div className="flex justify-between">
-          <h1 className="text-lg font-semibold mb-3">Berita</h1>
+          <h1 className="text-lg font-bold text-text-primary mb-3 ">Berita</h1>
 
           <Link href="/news">
             <h2 className="text-primary text-sm cursor-pointer hover:underline">

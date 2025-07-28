@@ -1,4 +1,3 @@
-
 export const getLocationName = async (lat, lng) => {
   const url = `/api/detail-locations?lat=${lat}&lon=${lng}`;
   try {
