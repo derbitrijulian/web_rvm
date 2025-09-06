@@ -1,11 +1,16 @@
-import { PrismaClient } from '../generated/prisma/index.js';
+import { PrismaClient } from '@prisma/client';
 
-const globalForPrisma = globalThis;
+let prisma;
 
-if (!globalForPrisma.prisma) {
-  globalForPrisma.prisma = new PrismaClient();
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient();
+} else {
+  if (!global.prisma) {
+    global.prisma = new PrismaClient({
+      log: ['error', 'warn'],
+    });
+  }
+  prisma = global.prisma;
 }
-
-const prisma = globalForPrisma.prisma;
 
 export default prisma;

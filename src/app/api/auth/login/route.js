@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import prisma from '../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
@@ -52,7 +52,6 @@ export async function POST(req) {
 
     return response;
   } catch (error) {
-    console.error('Login Error:', error);
     return NextResponse.json(
       { message: 'Terjadi kesalahan server' },
       { status: 500 }

@@ -1,15 +1,23 @@
 'use client';
-import L from 'leaflet';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import useFetch from '../../lib/use-fetch';
+import dynamic from 'next/dynamic';
+
+// Import Leaflet secara dinamik untuk menghindari SSR issues
+const DynamicMap = dynamic(() => import('../../components/LeafletMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+      Loading Map...
+    </div>
+  ),
+});
 
 export default function Page() {
   const [currentLocation, setCurrentLocation] = useState(null);
   const { data: locations, loading, error } = useFetch('/api/rvm-locations');
-
-  console.log('rvm location', locations?.data);
 
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -17,25 +25,32 @@ export default function Page() {
         (position) => {
           const { latitude, longitude } = position.coords;
           setCurrentLocation([latitude, longitude]);
-          console.log('Current Location:', [latitude, longitude]);
         },
         (error) => {
-          setError('Error getting location: ' + error.message);
           console.error('Location Error:', error);
         }
       );
     } else {
-      setError('Geolocation is not supported by this browser.');
+      console.error('Geolocation is not supported by this browser.');
     }
   }, []);
 
+  // Calculate distance using Haversine formula
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    if (lat1 && lon1 && lat2 && lon2) {
-      const from = L.latLng(lat1, lon1);
-      const to = L.latLng(lat2, lon2);
-      return from.distanceTo(to);
-    }
-    return null;
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+
+    const R = 6371; // Radius of the Earth in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c * 1000; // Distance in meters
+    return distance;
   };
 
   if (loading) return <div>Loading...</div>;
@@ -109,14 +124,30 @@ export default function Page() {
           <div className="flex gap-4 overflow-x-auto mt-3 scrollbar-hide">
             {(locations?.data || [])
               .map((rvm) => {
-                const distance = currentLocation
-                  ? calculateDistance(
-                      currentLocation[0],
-                      currentLocation[1],
-                      rvm.position.latitude,
-                      rvm.position.longitude
-                    )
-                  : null;
+                // Handle different position formats
+                let lat, lng;
+                if (rvm.position && typeof rvm.position === 'object') {
+                  // If position is an object with lat/lng or latitude/longitude
+                  lat = rvm.position.lat || rvm.position.latitude;
+                  lng = rvm.position.lng || rvm.position.longitude;
+                } else if (
+                  Array.isArray(rvm.position) &&
+                  rvm.position.length === 2
+                ) {
+                  // If position is an array [lat, lng]
+                  lat = rvm.position[0];
+                  lng = rvm.position[1];
+                }
+
+                const distance =
+                  currentLocation && lat && lng
+                    ? calculateDistance(
+                        currentLocation[0],
+                        currentLocation[1],
+                        lat,
+                        lng
+                      )
+                    : null;
 
                 if (distance && distance <= 7000) {
                   return (
@@ -164,7 +195,7 @@ export default function Page() {
                             </div>
                             <div>
                               <a
-                                href={`https://www.google.com/maps/dir/?api=1&destination=${rvm.position.latitude},${rvm.position.longitude}`}
+                                href={`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >

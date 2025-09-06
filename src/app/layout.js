@@ -1,8 +1,8 @@
 import './globals.css';
 import { Poppins } from 'next/font/google';
 import ClientLayout from './client-layout';
-import { LocationProvider } from '@/context/location';
-import { UserProvider } from '@/context/user';
+import { LocationProvider } from '../contexts/LocationContext';
+import { UserProvider } from '../contexts/UserContextNew';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -21,11 +21,9 @@ export default function RootLayout({ children }) {
       <body className={`${poppins.className} `}>
         <LocationProvider>
           <UserProvider>
-            {/* <BottleProvider> */}
-              <ClientLayout>
-                <main>{children}</main>
-              </ClientLayout>
-            {/* </BottleProvider> */}
+            <ClientLayout>
+              <main>{children}</main>
+            </ClientLayout>
           </UserProvider>
         </LocationProvider>
       </body>

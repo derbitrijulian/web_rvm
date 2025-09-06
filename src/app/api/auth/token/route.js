@@ -1,27 +1,49 @@
 import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 
 export async function GET() {
   try {
     const cookieStore = cookies();
-    const firebaseToken = cookieStore.get('firebase_token')?.value;
+    const token = cookieStore.get('token')?.value;
 
-    if (!firebaseToken) {
+    if (!token) {
       return new Response(JSON.stringify({ message: 'Token not found' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(
-      JSON.stringify({
-        message: 'Token retrieved successfully',
-        token: firebaseToken,
-      }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    // Verify the JWT token
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      return new Response(
+        JSON.stringify({
+          message: 'Token retrieved successfully',
+          token: token,
+          user: {
+            userId: decoded.userId,
+            email: decoded.email,
+          },
+          isValid: true,
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    } catch (jwtError) {
+      return new Response(
+        JSON.stringify({
+          message: 'Invalid token',
+          isValid: false,
+        }),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
   } catch (error) {
     return new Response(
       JSON.stringify({

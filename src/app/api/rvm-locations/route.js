@@ -1,12 +1,18 @@
-import prisma from '@/lib/prisma';
+import prisma from '../../../lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
   try {
+
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const skip = (page - 1) * limit;
+
+
+    // Test database connection
+    await prisma.$connect();
+
 
     const totalData = await prisma.rvmLocation.count();
 
@@ -23,10 +29,10 @@ export async function GET(req) {
         capacity: true,
         capacityStatus: true,
         createdAt: true,
-
-        // updatedAt: true,
+        updatedAt: true,
       },
     });
+
 
     const totalPage = Math.ceil(totalData / limit);
 
@@ -50,11 +56,13 @@ export async function GET(req) {
       },
     });
   } catch (error) {
-    console.error(error);
+
     return NextResponse.json(
       {
         code: 500,
         message: 'Internal server error',
+        error:
+          process.env.NODE_ENV === 'development' ? error.message : undefined,
         data: null,
       },
       { status: 500 }
@@ -91,69 +99,51 @@ export async function POST(req) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('POST Error:', error);
     return new NextResponse(JSON.stringify({ error: 'Server error' }), {
       status: 500,
     });
   }
 }
 
-// delete by id rvm
-export async function DELETEBYID(req) {
+// Delete by ID
+export async function DELETE(req) {
   try {
-    const { id } = await req.json();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
     if (!id) {
-      return new Response(
-        JSON.stringify({ error: 'ID is required to delete a marker.' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      return NextResponse.json(
+        { error: 'ID is required to delete an RVM location.' },
+        { status: 400 }
       );
     }
 
-    const markerDoc = doc(db, 'rvm-locations', `rvm-${id}`);
-    const markerSnapshot = await getDoc(markerDoc);
+    // Check if RVM location exists
+    const existingLocation = await prisma.rvmLocation.findUnique({
+      where: { id: parseInt(id) },
+    });
 
-    if (!markerSnapshot.exists()) {
-      return new Response(
-        JSON.stringify({ error: 'Marker with this ID does not exists' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+    if (!existingLocation) {
+      return NextResponse.json(
+        { error: 'RVM location with this ID does not exist' },
+        { status: 404 }
       );
     }
 
-    await deleteDoc(markerDoc);
+    // Delete the RVM location
+    await prisma.rvmLocation.delete({
+      where: { id: parseInt(id) },
+    });
 
-    return new Response(
-      JSON.stringify({
-        message: `RVM location with ID ${id} successfully deleted`,
-      }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      { message: `RVM location with ID ${id} successfully deleted` },
+      { status: 200 }
     );
   } catch (error) {
     console.error('Error deleting RVM location:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to delete RVM location' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-}
-
-// delete all rvm
-export async function DELETE(req) {
-  try {
-    const rvmCollection = collection(db, 'rvm-locations');
-    const snapshot = await getDocs(rvmCollection);
-
-    const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
-    await Promise.all(deletePromises);
-
-    return new Response(
-      JSON.stringify({ message: 'All RVM locations successfully deleted.' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
-    console.error('Error deleting RVM locations:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to delete RVM locations' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      { error: 'Failed to delete RVM location' },
+      { status: 500 }
     );
   }
 }

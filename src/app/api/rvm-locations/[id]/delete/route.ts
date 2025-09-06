@@ -29,7 +29,6 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
       { status: 200 }
     );
   } catch (error) {
-    console.error('DELETE /rvm-locations/[id] error:', error);
     return NextResponse.json(
       { error: 'Failed to delete RVM location' },
       { status: 500 }

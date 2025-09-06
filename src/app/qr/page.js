@@ -1,140 +1,336 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 
-export default function QRScanner() {
-  const router = useRouter();
-  const [scanResult, setScanResult] = useState(null);
+export default function QRScannerPage() {
+  const [scanner, setScanner] = useState(null);
   const [cameras, setCameras] = useState([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
-  const html5QrcodeScannerRef = useRef(null);
-  const readerRef = useRef(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanResult, setScanResult] = useState(null);
+  const [cameraError, setCameraError] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [currentStream, setCurrentStream] = useState(null);
+  const router = useRouter();
+
+  // Simplified and more reliable cleanup function
+  const cleanupStreams = async () => {
+    try {
+      console.log('🧹 Cleaning up camera resources...');
+
+      // Stop current stream tracks
+      if (currentStream) {
+        currentStream.getTracks().forEach((track) => {
+          try {
+            track.stop();
+            console.log('✅ Stopped track:', track.kind);
+          } catch (e) {
+            console.warn('Error stopping track:', e);
+          }
+        });
+        setCurrentStream(null);
+      }
+
+      // Stop scanner if running
+      if (scanner) {
+        try {
+          if (isScanning) {
+            await scanner.stop();
+            setIsScanning(false);
+          }
+          console.log('✅ Scanner stopped');
+        } catch (e) {
+          console.warn('Error stopping scanner:', e);
+        }
+      }
+
+      // Simple delay for cleanup
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      console.log('✅ Cleanup completed');
+    } catch (error) {
+      console.warn('Error during cleanup:', error);
+    }
+  };
+
+  // Add custom styles for full screen camera
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      #reader {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 1 !important;
+        background: #000 !important;
+      }
+      #reader > div {
+        width: 100% !important;
+        height: 100% !important;
+      }
+      #reader video {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
+      }
+      #reader canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
+      }
+      #reader__scan_region {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 10 !important;
+      }
+      #reader__scan_region img {
+        width: 300px !important;
+        height: 300px !important;
+        border: 2px solid #00ff00 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  useEffect(() => {
+    const initializeScanner = async () => {
+      const qrReaderId = 'reader';
+
+      // Wait for DOM to be ready
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      if (!document.getElementById(qrReaderId)) {
+        console.warn(`Element with ID '${qrReaderId}' is not available.`);
+        setIsInitializing(false);
+        return;
+      }
+
+      try {
+        // Force comprehensive cleanup first
+        await cleanupStreams();
+
+        console.log('🔄 Initializing camera...');
+
+        const qrScanner = new Html5Qrcode(qrReaderId);
+        setScanner(qrScanner);
+
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(
+          (device) => device.kind === 'videoinput'
+        );
+
+        console.log('📱 Available cameras:', videoDevices.length);
+        setCameras(videoDevices);
+
+        if (videoDevices.length > 0) {
+          // Priority untuk back camera
+          const backCamera = videoDevices.find((device) => {
+            const label = device.label.toLowerCase();
+            return (
+              label.includes('back') ||
+              label.includes('environment') ||
+              label.includes('rear') ||
+              label.includes('world')
+            );
+          });
+
+          let cameraToUse;
+          if (backCamera) {
+            cameraToUse = backCamera;
+            console.log('✅ Using back camera:', backCamera.label);
+          } else if (videoDevices.length > 1) {
+            // Use last camera (usually back)
+            cameraToUse = videoDevices[videoDevices.length - 1];
+            console.log(
+              '⚠️ No back camera found, using last camera:',
+              cameraToUse.label
+            );
+          } else {
+            // Single camera
+            cameraToUse = videoDevices[0];
+            console.log('📱 Single camera:', cameraToUse.label);
+          }
+
+          // Add delay before starting
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          await startScanning(qrScanner, cameraToUse.deviceId);
+        } else {
+          setCameraError('No cameras found.');
+        }
+      } catch (error) {
+        console.error('Error initializing cameras:', error);
+        setCameraError(`Camera initialization failed: ${error.message}`);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    initializeScanner();
+
+    // Cleanup on component unmount
+    return () => {
+      cleanupStreams();
+    };
+  }, []);
+
+  const startScanning = async (qrScanner, deviceId) => {
+    console.log('🎥 Starting camera scan...');
+    setCameraError(null);
+    setIsScanning(true);
+
+    // Simple, reliable camera start with back camera priority
+    const constraints = [
+      { facingMode: 'environment' }, // Back camera
+      { deviceId: deviceId }, // Specific device
+      { video: true }, // Fallback
+    ];
+
+    for (let i = 0; i < constraints.length; i++) {
+      try {
+        console.log(`Trying camera constraint ${i + 1}:`, constraints[i]);
+
+        await qrScanner.start(
+          constraints[i],
+          {
+            fps: 20,
+            qrbox: (width, height) => {
+              const size = Math.min(width, height) * 0.6;
+              return { width: size, height: size };
+            },
+          },
+          (decodedText) => {
+            console.log('QR Detected:', decodedText);
+            setScanResult(decodedText);
+
+            qrScanner.stop().catch(console.warn);
+            setIsScanning(false);
+
+            if (isValidUrl(decodedText)) {
+              router.replace(decodedText);
+            } else {
+              alert('Hasil scan bukan URL valid: ' + decodedText);
+            }
+          },
+          (error) => {
+            // Suppress common scanning errors
+            if (!error.includes('No QR code found')) {
+              console.warn('Scan error:', error);
+            }
+          }
+        );
+
+        console.log('✅ Camera started successfully');
+        return; // Success, exit function
+      } catch (error) {
+        console.warn(`Camera constraint ${i + 1} failed:`, error.message);
+
+        if (i === constraints.length - 1) {
+          // Last attempt failed
+          setCameraError(`Camera failed: ${error.message}`);
+          setIsScanning(false);
+        }
+      }
+    }
+  };
 
   const isValidUrl = (string) => {
     try {
       new URL(string);
       return true;
-    } catch (_) {
+    } catch (error) {
       return false;
     }
   };
 
-  const startScanning = async (deviceId) => {
-    if (!readerRef.current) return;
-
-    const scanner = new Html5Qrcode(readerRef.current.id);
-    html5QrcodeScannerRef.current = scanner;
-
-    try {
-      await scanner.start(
-        { deviceId: { exact: deviceId } },
-        {
-          fps: 5,
-          qrbox: { width: 300, height: 400 },
-        },
-        (decodedText) => {
-          console.log('Decoded:', decodedText);
-          setScanResult(decodedText);
-          scanner.stop().catch((e) => console.warn('Stop error:', e));
-          if (isValidUrl(decodedText)) {
-            router.push(decodedText);
-          } else {
-            alert('Hasil scan bukan URL valid:\n' + decodedText);
-          }
-        },
-        (err) => {
-          console.warn('Scan error:', err);
-        }
-      );
-    } catch (err) {
-      console.error('Start scan error:', err);
-    }
+  const goToPanduan = () => {
+    console.log('🔄 Navigating to panduan, cleaning up camera...');
+    cleanupStreams().then(() => {
+      router.push('/panduan');
+    });
   };
 
-  const stopScanner = async () => {
-    if (html5QrcodeScannerRef.current) {
-      await html5QrcodeScannerRef.current.stop().catch(() => {});
-      html5QrcodeScannerRef.current.clear();
-      html5QrcodeScannerRef.current = null;
-    }
-  };
-
-  const toggleCamera = async () => {
-    if (cameras.length <= 1) return;
-
-    await stopScanner();
-    const nextIndex = (currentCameraIndex + 1) % cameras.length;
-    setCurrentCameraIndex(nextIndex);
-    startScanning(cameras[nextIndex].deviceId);
-  };
-
-  useEffect(() => {
-    const setupScanner = async () => {
-      try {
-        const devices = await Html5Qrcode.getCameras();
-        if (devices.length === 0) {
-          alert('Kamera tidak ditemukan.');
-          return;
-        }
-
-        setCameras(devices);
-        setCurrentCameraIndex(0);
-        startScanning(devices[0].deviceId);
-      } catch (err) {
-        console.error('Camera error:', err);
-        alert('Gagal mengakses kamera.');
-      }
-    };
-
-    setupScanner();
-
-    return () => {
-      stopScanner();
-    };
-  }, []);
+  if (isInitializing) {
+    return (
+      <div className="fixed inset-0 bg-black flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Initializing camera...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col relative items-center justify-center min-h-screen bg-gray-100">
-      {/* Fullscreen camera */}
-      <div
-        ref={readerRef}
-        id="reader"
-        className="w-full h-full"
-        style={{
-          objectFit: 'cover',
-        }}
-      />
-      {scanResult && (
-        <div className="mt-4 p-4 bg-white border border-green-500 rounded-md shadow-md">
-          <p className="text-green-800 font-semibold">Hasil Scan:</p>
-          <p className="text-sm text-gray-800 break-words">{scanResult}</p>
-        </div>
-      )}
+    <div className="relative w-full h-screen bg-black overflow-hidden">
+      {/* QR Reader */}
+      <div id="reader" className="w-full h-full"></div>
 
-      <div className="rounded-2xl bg-white w-[336px] h-[67px] bottom-0 absolute shadow-md">
-        <div className="flex justify-center gap-[210px] py-4 px-7">
-          <div onClick={toggleCamera} className="cursor-pointer">
+      {/* Top UI */}
+      <div className="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/50 to-transparent">
+        <div className="flex justify-between items-center">
+          <button
+            onClick={() => router.back()}
+            className="text-white bg-black/50 rounded-full p-2"
+          >
             <Image
-              src="/svg/switch-camera.svg"
-              alt="Switch Camera"
-              width={35}
-              height={35}
+              src="/svg/image-back.svg"
+              alt="Back"
+              width={24}
+              height={24}
             />
+          </button>
+          <div className="text-white text-lg font-semibold">Scan QR Code</div>
+          <button
+            onClick={goToPanduan}
+            className="text-white bg-white rounded-full p-2"
+          >
+            <Image src="/svg/panduan.svg" alt="Guide" width={24} height={24} />
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom UI */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 p-6 bg-gradient-to-t from-black/70 to-transparent">
+        <div className="text-center">
+          <div className="text-white text-sm mb-4">
+            Arahkan kamera ke QR code
           </div>
-          <div>
-            <Link href="/panduan">
-              <Image
-                src="/svg/panduan.svg"
-                alt="panduan"
-                width={35}
-                height={35}
-              />
-            </Link>
+
+          {/* Status indicator */}
+          <div className="flex items-center justify-center mb-4">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                isScanning ? 'bg-green-400' : 'bg-red-400'
+              } mr-2`}
+            ></div>
+            <span className="text-white text-sm">
+              {isScanning ? 'Camera Active' : 'Camera Inactive'}
+            </span>
           </div>
+
+          {cameraError && (
+            <div className="text-red-400 text-sm mb-4">{cameraError}</div>
+          )}
+
+          {scanResult && (
+            <div className="text-green-400 text-sm">
+              Scan Result: {scanResult}
+            </div>
+          )}
         </div>
       </div>
     </div>

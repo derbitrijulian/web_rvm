@@ -1,25 +1,53 @@
 'use client';
 
 import { useState } from 'react';
-import { sendPasswordResetEmail } from 'firebase/auth';
 import Image from 'next/image';
 import Link from 'next/link';
-import { auth } from '@/app/firebase';
 
-auth;
 export default function ForgotAndNewPassword({ title, children }) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Email wajib diisi');
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError('Format email tidak valid');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
     try {
-      await sendPasswordResetEmail(auth, email);
-      setSuccess('Email reset password telah dikirim!');
-      setError('');
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(
+          'Email reset password telah dikirim! Periksa kotak masuk Anda.'
+        );
+        setEmail('');
+      } else {
+        setError(data.message || 'Terjadi kesalahan');
+      }
     } catch (err) {
-      setError('Terjadi kesalahan, periksa kembali alamat email Anda.');
-      setSuccess('');
+      setError('Terjadi kesalahan koneksi');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,9 +89,10 @@ export default function ForgotAndNewPassword({ title, children }) {
         <div className="grid justify-center gap-3 pt-5 pb-3">
           <button
             onClick={handleForgotPassword}
-            className="py-3 bg-primary rounded-xl w-52 text-bgSecondary font-semibold text-xl"
+            disabled={loading}
+            className="py-3 bg-primary rounded-xl w-52 text-bgSecondary font-semibold text-xl disabled:opacity-50"
           >
-            Verifikasi!
+            {loading ? 'Mengirim...' : 'Verifikasi!'}
           </button>
         </div>
 

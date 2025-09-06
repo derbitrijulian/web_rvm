@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { registerUser } from '@/services/auth-service';
+import { registerUser } from '../../services/auth-service';
 
 export default function Page() {
   const [formData, setFormData] = useState({

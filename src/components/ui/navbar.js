@@ -5,24 +5,25 @@ import { CiLocationOn, CiUser } from 'react-icons/ci';
 import { FiActivity } from 'react-icons/fi';
 import { BiNavigation } from 'react-icons/bi';
 import Link from 'next/link';
-import { useLocation } from '@/context/location';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { useLocation } from '../../contexts/LocationContext';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { selectedLocation } = useLocation();
+  const { selectedLocation, currentLocation } = useLocation();
 
   const isActive = (path) => pathname === path;
 
   const openGoogleMaps = () => {
-    if (selectedLocation) {
+    if (selectedLocation && currentLocation) {
       const { lat, lng } = selectedLocation;
       window.open(
-        `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+        `https://www.google.com/maps/dir/${currentLocation[0]},${currentLocation[1]}/${lat},${lng}`,
         '_blank'
       );
     } else {
-      console.error('No Location Selected');
+      console.error('No Location Selected or Current Location not available');
     }
   };
 

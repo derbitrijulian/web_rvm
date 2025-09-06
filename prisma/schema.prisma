@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,27 +7,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 model User {
-  id          String   @id @default(uuid())
+  id          String           @id @default(uuid())
+  email       String           @unique
+  createdAt   DateTime         @default(now())
   nama        String
-  email       String   @unique
   password    String
-  phoneNumber String   @map("phone_number")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  phoneNumber String           @map("phone_number")
+  updatedAt   DateTime         @updatedAt
+  
+  // Relasi one-to-one dengan UserBottleCount
+  bottleCount UserBottleCount?
 }
 
+model UserBottleCount {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  totalBottles    Int      @default(0)
+  redeemableCount Int      @default(0)
+  lifetimeCount   Int      @default(0)
+  lastUpdated     DateTime @default(now()) @updatedAt
+  
+  // Relasi dengan User
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_bottle_counts")
+}
+
+model BottleTransaction {
+  id            String              @id @default(uuid())
+  userId        String
+  rvmLocationId Int?
+  type          BottleTransactionType
+  amount        Int
+  description   String?
+  createdAt     DateTime            @default(now())
+  
+  // Relasi dengan User (tanpa foreign key constraint untuk fleksibilitas)
+  @@map("bottle_transactions")
+}
+
+enum BottleTransactionType {
+  DEPOSIT   // Menambah bottle (dari RVM)
+  REDEEM    // Menukar bottle dengan reward
+  ADJUSTMENT // Penyesuaian manual
+}
 
 model RvmLocation {
-  id             Int   @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   name           String
-  position       Json    
+  position       Json
   capacity       Int
   capacityStatus String
-  image          String?  
+  image          String?
   createdAt      DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
+  updatedAt      DateTime @default(now()) @updatedAt
 }

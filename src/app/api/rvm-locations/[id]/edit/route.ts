@@ -48,7 +48,6 @@ export async function PUT(req, { params }) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('PUT /rvm-locations/[id]/edit error:', error);
     return NextResponse.json(
       { error: 'Failed to update RVM location' },
       { status: 500 }
