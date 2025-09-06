@@ -77,7 +77,7 @@ export async function GET(req) {
       },
       { status: 500 }
     );
-  } c
+  } 
 }
 
 export async function PUT(req) {
@@ -150,4 +150,4 @@ export async function PUT(req) {
       { status: 500 }
     );
   }
-}
+}
