@@ -17,7 +17,10 @@ export async function GET(req) {
 
     if (!token) {
       return NextResponse.json(
-        { message: 'Token tidak ditemukan. Silakan login kembali.' },
+        {
+          success: false,
+          message: 'Token tidak ditemukan. Silakan login kembali.',
+        },
         { status: 401 }
       );
     }
@@ -25,13 +28,13 @@ export async function GET(req) {
     const decoded = verifyToken(token);
     if (!decoded) {
       return NextResponse.json(
-        { message: 'Token tidak valid. Silakan login kembali.' },
+        {
+          success: false,
+          message: 'Token tidak valid. Silakan login kembali.',
+        },
         { status: 401 }
       );
     }
-
-
-    await prisma.$connect();
 
     // Ambil data user dari database
     const user = await prisma.user.findUnique({
@@ -43,7 +46,10 @@ export async function GET(req) {
 
     if (!user) {
       return NextResponse.json(
-        { message: 'User tidak ditemukan' },
+        {
+          success: false,
+          message: 'User tidak ditemukan',
+        },
         { status: 404 }
       );
     }
@@ -53,6 +59,7 @@ export async function GET(req) {
 
     return NextResponse.json(
       {
+        success: true,
         code: 200,
         message: 'Berhasil mengambil data profile',
         data: {
@@ -68,16 +75,17 @@ export async function GET(req) {
       { status: 200 }
     );
   } catch (error) {
-
+    console.error('Profile GET Error:', error);
     return NextResponse.json(
       {
+        success: false,
         message: 'Terjadi kesalahan server',
         error:
           process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
     );
-  } 
+  }
 }
 
 export async function PUT(req) {
@@ -87,7 +95,10 @@ export async function PUT(req) {
 
     if (!token) {
       return NextResponse.json(
-        { message: 'Token tidak ditemukan. Silakan login kembali.' },
+        {
+          success: false,
+          message: 'Token tidak ditemukan. Silakan login kembali.',
+        },
         { status: 401 }
       );
     }
@@ -96,7 +107,10 @@ export async function PUT(req) {
     const decoded = verifyToken(token);
     if (!decoded) {
       return NextResponse.json(
-        { message: 'Token tidak valid. Silakan login kembali.' },
+        {
+          success: false,
+          message: 'Token tidak valid. Silakan login kembali.',
+        },
         { status: 401 }
       );
     }
@@ -106,7 +120,10 @@ export async function PUT(req) {
     // Validasi input
     if (!nama || !phoneNumber) {
       return NextResponse.json(
-        { message: 'Nama dan nomor telepon wajib diisi' },
+        {
+          success: false,
+          message: 'Nama dan nomor telepon wajib diisi',
+        },
         { status: 400 }
       );
     }
@@ -129,6 +146,7 @@ export async function PUT(req) {
 
     return NextResponse.json(
       {
+        success: true,
         code: 200,
         message: 'Profile berhasil diupdate',
         data: {
@@ -146,7 +164,12 @@ export async function PUT(req) {
   } catch (error) {
     console.error('Update Profile Error:', error);
     return NextResponse.json(
-      { message: 'Terjadi kesalahan server' },
+      {
+        success: false,
+        message: 'Terjadi kesalahan server',
+        error:
+          process.env.NODE_ENV === 'development' ? error.message : undefined,
+      },
       { status: 500 }
     );
   }

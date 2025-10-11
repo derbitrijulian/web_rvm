@@ -213,17 +213,93 @@ export default function QRScannerPage() {
             },
           },
           (decodedText) => {
-            console.log('QR Detected:', decodedText);
+            console.log('🎯 QR Code Detected:', decodedText);
             setScanResult(decodedText);
 
+            // Stop scanner immediately
             qrScanner.stop().catch(console.warn);
             setIsScanning(false);
 
-            if (isValidUrl(decodedText)) {
-              router.replace(decodedText);
-            } else {
-              alert('Hasil scan bukan URL valid: ' + decodedText);
+            // Clean up streams
+            cleanupStreams();
+
+            // Handle different types of QR codes
+            console.log('🔄 Processing QR result...');
+
+            // Special handling for bottlein
+            if (
+              decodedText.includes('bottlein') ||
+              decodedText.includes('/bottlein')
+            ) {
+              console.log('✅ Detected bottlein QR, redirecting...');
+              setTimeout(() => {
+                router.push('/bottlein');
+              }, 500);
+              return;
             }
+
+            // Handle full URLs
+            if (
+              decodedText.startsWith('http://localhost:3000/bottlein') ||
+              decodedText.startsWith('https://localhost:3000/bottlein')
+            ) {
+              console.log('✅ Detected localhost bottlein URL, redirecting...');
+              setTimeout(() => {
+                router.push('/bottlein');
+              }, 500);
+              return;
+            }
+
+            // Handle any localhost URL
+            if (decodedText.includes('localhost:3000')) {
+              console.log('✅ Detected localhost URL:', decodedText);
+              try {
+                const url = new URL(decodedText);
+                setTimeout(() => {
+                  router.push(url.pathname + url.search);
+                }, 500);
+              } catch (e) {
+                console.error('Error parsing localhost URL:', e);
+                setTimeout(() => {
+                  router.push('/bottlein');
+                }, 500);
+              }
+              return;
+            }
+
+            // Handle relative paths
+            if (decodedText.startsWith('/')) {
+              console.log('✅ Detected relative path:', decodedText);
+              setTimeout(() => {
+                router.push(decodedText);
+              }, 500);
+              return;
+            }
+
+            // Handle full URLs
+            if (isValidUrl(decodedText)) {
+              console.log('✅ Detected valid URL:', decodedText);
+              if (decodedText.startsWith('http')) {
+                window.location.href = decodedText;
+              } else {
+                setTimeout(() => {
+                  router.push(decodedText);
+                }, 500);
+              }
+              return;
+            }
+
+            // Default fallback - assume it's for bottlein
+            console.log(
+              '⚠️ Unknown QR format, defaulting to bottlein:',
+              decodedText
+            );
+            alert(
+              `QR Code: ${decodedText}\nMengarahkan ke halaman Bottle In...`
+            );
+            setTimeout(() => {
+              router.push('/bottlein');
+            }, 1000);
           },
           (error) => {
             // Suppress common scanning errors
@@ -249,9 +325,18 @@ export default function QRScannerPage() {
 
   const isValidUrl = (string) => {
     try {
+      // Check if it's a valid URL
       new URL(string);
       return true;
     } catch (error) {
+      // Also accept relative paths that start with /
+      if (string.startsWith('/')) {
+        return true;
+      }
+      // Accept localhost URLs
+      if (string.includes('localhost') || string.includes('127.0.0.1')) {
+        return true;
+      }
       return false;
     }
   };

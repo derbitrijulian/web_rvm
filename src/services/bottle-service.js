@@ -49,6 +49,8 @@ export class BottleService {
           totalBottles: 0,
           redeemableCount: 0,
           lifetimeCount: 0,
+          points: 0,
+          lifetimePoints: 0,
         },
         include: { user: { select: { id: true, nama: true, email: true } } },
       });
@@ -75,6 +77,9 @@ export class BottleService {
       }
 
       return await prisma.$transaction(async (prisma) => {
+        // Calculate points (1 bottle = 10 points)
+        const pointsToAdd = amount * 50;
+
         // Update bottle count
         const updatedBottleCount = await prisma.userBottleCount.upsert({
           where: { userId },
@@ -82,6 +87,8 @@ export class BottleService {
             totalBottles: { increment: amount },
             redeemableCount: { increment: amount },
             lifetimeCount: { increment: amount },
+            points: { increment: pointsToAdd },
+            lifetimePoints: { increment: pointsToAdd },
             lastUpdated: new Date(),
           },
           create: {
@@ -89,6 +96,8 @@ export class BottleService {
             totalBottles: amount,
             redeemableCount: amount,
             lifetimeCount: amount,
+            points: pointsToAdd,
+            lifetimePoints: pointsToAdd,
           },
           include: { user: { select: { id: true, nama: true, email: true } } },
         });
@@ -311,6 +320,170 @@ export class BottleService {
       };
     } catch (error) {
       throw new Error(`Failed to get bottle statistics: ${error.message}`);
+    }
+  }
+
+  /**
+   * Record bottle detection dari Arduino (raw detection)
+   * @param {string} deviceId - ID device Arduino
+   * @param {number} count - Jumlah bottle yang terdeteksi
+   * @param {number} distance - Jarak sensor saat deteksi (optional)
+   * @returns {Promise<Object>} Created bottle detection record
+   */
+  async recordBottleDetection(deviceId, count = 1, distance = null) {
+    try {
+      const detection = await prisma.bottleCount.create({
+        data: {
+          deviceId,
+          count,
+          distance,
+          timestamp: new Date(),
+        },
+      });
+
+      console.log(`✅ Bottle detection recorded:`, {
+        deviceId,
+        count,
+        distance,
+        id: detection.id,
+      });
+
+      return detection;
+    } catch (error) {
+      console.error(`❌ Failed to record bottle detection:`, error);
+      throw new Error(`Failed to record bottle detection: ${error.message}`);
+    }
+  }
+
+  /**
+   * Process Arduino bottle detection with proper user separation
+   * @param {Object} params - Detection parameters
+   * @param {string} params.deviceId - Arduino device ID
+   * @param {string|null} params.userId - User ID (optional for anonymous detection)
+   * @param {number|null} params.rvmLocationId - RVM location ID
+   * @param {number} params.count - Number of bottles detected
+   * @param {number|null} params.distance - Sensor distance measurement
+   * @param {string|null} params.sessionId - User session ID
+   * @param {string} params.description - Detection description
+   * @returns {Promise<Object>} Processing result with bottle detection and optional user stats
+   */
+  async processArduinoBottleDetection({
+    deviceId,
+    userId = null,
+    rvmLocationId = null,
+    count = 1,
+    distance = null,
+    sessionId = null,
+    description = 'Arduino bottle detection',
+  }) {
+    try {
+      console.log(`🔄 Processing bottle detection:`, {
+        deviceId,
+        userId: userId || 'anonymous',
+        count,
+        rvmLocationId,
+      });
+
+      // 1. Create bottle detection record
+      const bottleDetection = await prisma.bottleCount.create({
+        data: {
+          deviceId,
+          userId,
+          rvmLocationId,
+          count,
+          distance,
+          sessionId,
+          processed: userId ? true : false, // Mark as processed if user session exists
+          timestamp: new Date(),
+        },
+      });
+
+      let userStats = null;
+      let pointsEarned = 0;
+
+      // 2. If user session is active, update user account
+      if (userId) {
+        try {
+          // Verify user exists
+          const user = await prisma.user.findUnique({
+            where: { id: userId },
+          });
+
+          if (!user) {
+            console.warn(
+              `⚠️ User ${userId} not found, treating as anonymous detection`
+            );
+            // Update detection to remove invalid userId
+            await prisma.bottleCount.update({
+              where: { id: bottleDetection.id },
+              data: { userId: null, processed: false },
+            });
+          } else {
+            // Calculate points (10 points per bottle)
+            pointsEarned = count * 50;
+
+            // Update user bottle count
+            userStats = await this.addBottles(
+              userId,
+              count,
+              rvmLocationId,
+              description
+            );
+
+            // Create transaction record
+            await prisma.bottleTransaction.create({
+              data: {
+                userId,
+                rvmLocationId,
+                type: 'DEPOSIT',
+                amount: count,
+                description: `${description} - Device: ${deviceId}`,
+              },
+            });
+
+            console.log(
+              `✅ User account updated: ${userId}, bottles: +${count}, points: +${pointsEarned}`
+            );
+          }
+        } catch (userError) {
+          console.error(`❌ Error processing user account:`, userError);
+          // Mark detection as unprocessed
+          await prisma.bottleCount.update({
+            where: { id: bottleDetection.id },
+            data: { processed: false },
+          });
+        }
+      }
+
+      return {
+        bottleDetection,
+        userStats,
+        pointsEarned,
+      };
+    } catch (error) {
+      console.error(`❌ Failed to process Arduino bottle detection:`, error);
+      throw new Error(`Failed to process bottle detection: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get Arduino connection status
+   * @param {string} deviceId - Arduino device ID
+   * @returns {Promise<Object|null>} Connection status or null if not found
+   */
+  async getArduinoConnectionStatus(deviceId) {
+    try {
+      return await prisma.arduinoConnection.findUnique({
+        where: { deviceId },
+        include: {
+          rvmLocation: {
+            select: { id: true, name: true },
+          },
+        },
+      });
+    } catch (error) {
+      console.error(`❌ Failed to get Arduino connection status:`, error);
+      return null;
     }
   }
 }
