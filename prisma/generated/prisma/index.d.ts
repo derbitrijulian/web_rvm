@@ -1343,10 +1343,12 @@ export namespace Prisma {
 
   export type UserBottleCountCountOutputType = {
     bottleCounts: number
+    bottleTransactions: number
   }
 
   export type UserBottleCountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     bottleCounts?: boolean | UserBottleCountCountOutputTypeCountBottleCountsArgs
+    bottleTransactions?: boolean | UserBottleCountCountOutputTypeCountBottleTransactionsArgs
   }
 
   // Custom InputTypes
@@ -1365,6 +1367,13 @@ export namespace Prisma {
    */
   export type UserBottleCountCountOutputTypeCountBottleCountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BottleCountWhereInput
+  }
+
+  /**
+   * UserBottleCountCountOutputType without action
+   */
+  export type UserBottleCountCountOutputTypeCountBottleTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BottleTransactionWhereInput
   }
 
 
@@ -2700,6 +2709,7 @@ export namespace Prisma {
     lifetimePoints?: boolean
     lastUpdated?: boolean
     bottleCounts?: boolean | UserBottleCount$bottleCountsArgs<ExtArgs>
+    bottleTransactions?: boolean | UserBottleCount$bottleTransactionsArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | UserBottleCountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["userBottleCount"]>
@@ -2742,6 +2752,7 @@ export namespace Prisma {
   export type UserBottleCountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "totalBottles" | "redeemableCount" | "lifetimeCount" | "points" | "lifetimePoints" | "lastUpdated", ExtArgs["result"]["userBottleCount"]>
   export type UserBottleCountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     bottleCounts?: boolean | UserBottleCount$bottleCountsArgs<ExtArgs>
+    bottleTransactions?: boolean | UserBottleCount$bottleTransactionsArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | UserBottleCountCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -2756,6 +2767,7 @@ export namespace Prisma {
     name: "UserBottleCount"
     objects: {
       bottleCounts: Prisma.$BottleCountPayload<ExtArgs>[]
+      bottleTransactions: Prisma.$BottleTransactionPayload<ExtArgs>[]
       user: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -3162,6 +3174,7 @@ export namespace Prisma {
   export interface Prisma__UserBottleCountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     bottleCounts<T extends UserBottleCount$bottleCountsArgs<ExtArgs> = {}>(args?: Subset<T, UserBottleCount$bottleCountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BottleCountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    bottleTransactions<T extends UserBottleCount$bottleTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, UserBottleCount$bottleTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BottleTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -3620,6 +3633,30 @@ export namespace Prisma {
   }
 
   /**
+   * UserBottleCount.bottleTransactions
+   */
+  export type UserBottleCount$bottleTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BottleTransaction
+     */
+    select?: BottleTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BottleTransaction
+     */
+    omit?: BottleTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
+    where?: BottleTransactionWhereInput
+    orderBy?: BottleTransactionOrderByWithRelationInput | BottleTransactionOrderByWithRelationInput[]
+    cursor?: BottleTransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BottleTransactionScalarFieldEnum | BottleTransactionScalarFieldEnum[]
+  }
+
+  /**
    * UserBottleCount without action
    */
   export type UserBottleCountDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3651,85 +3688,95 @@ export namespace Prisma {
   }
 
   export type BottleTransactionAvgAggregateOutputType = {
-    rvmLocationId: number | null
-    amount: number | null
+    bottleCountId: number | null
+    bottleCount: number | null
+    pointsEarned: number | null
   }
 
   export type BottleTransactionSumAggregateOutputType = {
-    rvmLocationId: number | null
-    amount: number | null
+    bottleCountId: number | null
+    bottleCount: number | null
+    pointsEarned: number | null
   }
 
   export type BottleTransactionMinAggregateOutputType = {
     id: string | null
-    userId: string | null
-    rvmLocationId: number | null
-    type: $Enums.BottleTransactionType | null
-    amount: number | null
-    description: string | null
-    createdAt: Date | null
+    userBottleCountId: string | null
+    bottleCountId: number | null
+    deviceId: string | null
+    transactionType: string | null
+    bottleCount: number | null
+    pointsEarned: number | null
+    timestamp: Date | null
   }
 
   export type BottleTransactionMaxAggregateOutputType = {
     id: string | null
-    userId: string | null
-    rvmLocationId: number | null
-    type: $Enums.BottleTransactionType | null
-    amount: number | null
-    description: string | null
-    createdAt: Date | null
+    userBottleCountId: string | null
+    bottleCountId: number | null
+    deviceId: string | null
+    transactionType: string | null
+    bottleCount: number | null
+    pointsEarned: number | null
+    timestamp: Date | null
   }
 
   export type BottleTransactionCountAggregateOutputType = {
     id: number
-    userId: number
-    rvmLocationId: number
-    type: number
-    amount: number
-    description: number
-    createdAt: number
+    userBottleCountId: number
+    bottleCountId: number
+    deviceId: number
+    transactionType: number
+    bottleCount: number
+    pointsEarned: number
+    timestamp: number
     _all: number
   }
 
 
   export type BottleTransactionAvgAggregateInputType = {
-    rvmLocationId?: true
-    amount?: true
+    bottleCountId?: true
+    bottleCount?: true
+    pointsEarned?: true
   }
 
   export type BottleTransactionSumAggregateInputType = {
-    rvmLocationId?: true
-    amount?: true
+    bottleCountId?: true
+    bottleCount?: true
+    pointsEarned?: true
   }
 
   export type BottleTransactionMinAggregateInputType = {
     id?: true
-    userId?: true
-    rvmLocationId?: true
-    type?: true
-    amount?: true
-    description?: true
-    createdAt?: true
+    userBottleCountId?: true
+    bottleCountId?: true
+    deviceId?: true
+    transactionType?: true
+    bottleCount?: true
+    pointsEarned?: true
+    timestamp?: true
   }
 
   export type BottleTransactionMaxAggregateInputType = {
     id?: true
-    userId?: true
-    rvmLocationId?: true
-    type?: true
-    amount?: true
-    description?: true
-    createdAt?: true
+    userBottleCountId?: true
+    bottleCountId?: true
+    deviceId?: true
+    transactionType?: true
+    bottleCount?: true
+    pointsEarned?: true
+    timestamp?: true
   }
 
   export type BottleTransactionCountAggregateInputType = {
     id?: true
-    userId?: true
-    rvmLocationId?: true
-    type?: true
-    amount?: true
-    description?: true
-    createdAt?: true
+    userBottleCountId?: true
+    bottleCountId?: true
+    deviceId?: true
+    transactionType?: true
+    bottleCount?: true
+    pointsEarned?: true
+    timestamp?: true
     _all?: true
   }
 
@@ -3821,12 +3868,13 @@ export namespace Prisma {
 
   export type BottleTransactionGroupByOutputType = {
     id: string
-    userId: string
-    rvmLocationId: number | null
-    type: $Enums.BottleTransactionType
-    amount: number
-    description: string | null
-    createdAt: Date
+    userBottleCountId: string
+    bottleCountId: number | null
+    deviceId: string | null
+    transactionType: string
+    bottleCount: number
+    pointsEarned: number
+    timestamp: Date
     _count: BottleTransactionCountAggregateOutputType | null
     _avg: BottleTransactionAvgAggregateOutputType | null
     _sum: BottleTransactionSumAggregateOutputType | null
@@ -3850,57 +3898,76 @@ export namespace Prisma {
 
   export type BottleTransactionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    userId?: boolean
-    rvmLocationId?: boolean
-    type?: boolean
-    amount?: boolean
-    description?: boolean
-    createdAt?: boolean
+    userBottleCountId?: boolean
+    bottleCountId?: boolean
+    deviceId?: boolean
+    transactionType?: boolean
+    bottleCount?: boolean
+    pointsEarned?: boolean
+    timestamp?: boolean
+    userBottleCount?: boolean | UserBottleCountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["bottleTransaction"]>
 
   export type BottleTransactionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    userId?: boolean
-    rvmLocationId?: boolean
-    type?: boolean
-    amount?: boolean
-    description?: boolean
-    createdAt?: boolean
+    userBottleCountId?: boolean
+    bottleCountId?: boolean
+    deviceId?: boolean
+    transactionType?: boolean
+    bottleCount?: boolean
+    pointsEarned?: boolean
+    timestamp?: boolean
+    userBottleCount?: boolean | UserBottleCountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["bottleTransaction"]>
 
   export type BottleTransactionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    userId?: boolean
-    rvmLocationId?: boolean
-    type?: boolean
-    amount?: boolean
-    description?: boolean
-    createdAt?: boolean
+    userBottleCountId?: boolean
+    bottleCountId?: boolean
+    deviceId?: boolean
+    transactionType?: boolean
+    bottleCount?: boolean
+    pointsEarned?: boolean
+    timestamp?: boolean
+    userBottleCount?: boolean | UserBottleCountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["bottleTransaction"]>
 
   export type BottleTransactionSelectScalar = {
     id?: boolean
-    userId?: boolean
-    rvmLocationId?: boolean
-    type?: boolean
-    amount?: boolean
-    description?: boolean
-    createdAt?: boolean
+    userBottleCountId?: boolean
+    bottleCountId?: boolean
+    deviceId?: boolean
+    transactionType?: boolean
+    bottleCount?: boolean
+    pointsEarned?: boolean
+    timestamp?: boolean
   }
 
-  export type BottleTransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "rvmLocationId" | "type" | "amount" | "description" | "createdAt", ExtArgs["result"]["bottleTransaction"]>
+  export type BottleTransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userBottleCountId" | "bottleCountId" | "deviceId" | "transactionType" | "bottleCount" | "pointsEarned" | "timestamp", ExtArgs["result"]["bottleTransaction"]>
+  export type BottleTransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    userBottleCount?: boolean | UserBottleCountDefaultArgs<ExtArgs>
+  }
+  export type BottleTransactionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    userBottleCount?: boolean | UserBottleCountDefaultArgs<ExtArgs>
+  }
+  export type BottleTransactionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    userBottleCount?: boolean | UserBottleCountDefaultArgs<ExtArgs>
+  }
 
   export type $BottleTransactionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BottleTransaction"
-    objects: {}
+    objects: {
+      userBottleCount: Prisma.$UserBottleCountPayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      userId: string
-      rvmLocationId: number | null
-      type: $Enums.BottleTransactionType
-      amount: number
-      description: string | null
-      createdAt: Date
+      userBottleCountId: string
+      bottleCountId: number | null
+      deviceId: string | null
+      transactionType: string
+      bottleCount: number
+      pointsEarned: number
+      timestamp: Date
     }, ExtArgs["result"]["bottleTransaction"]>
     composites: {}
   }
@@ -4295,6 +4362,7 @@ export namespace Prisma {
    */
   export interface Prisma__BottleTransactionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    userBottleCount<T extends UserBottleCountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserBottleCountDefaultArgs<ExtArgs>>): Prisma__UserBottleCountClient<$Result.GetResult<Prisma.$UserBottleCountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4325,12 +4393,13 @@ export namespace Prisma {
    */
   interface BottleTransactionFieldRefs {
     readonly id: FieldRef<"BottleTransaction", 'String'>
-    readonly userId: FieldRef<"BottleTransaction", 'String'>
-    readonly rvmLocationId: FieldRef<"BottleTransaction", 'Int'>
-    readonly type: FieldRef<"BottleTransaction", 'BottleTransactionType'>
-    readonly amount: FieldRef<"BottleTransaction", 'Int'>
-    readonly description: FieldRef<"BottleTransaction", 'String'>
-    readonly createdAt: FieldRef<"BottleTransaction", 'DateTime'>
+    readonly userBottleCountId: FieldRef<"BottleTransaction", 'String'>
+    readonly bottleCountId: FieldRef<"BottleTransaction", 'Int'>
+    readonly deviceId: FieldRef<"BottleTransaction", 'String'>
+    readonly transactionType: FieldRef<"BottleTransaction", 'String'>
+    readonly bottleCount: FieldRef<"BottleTransaction", 'Int'>
+    readonly pointsEarned: FieldRef<"BottleTransaction", 'Int'>
+    readonly timestamp: FieldRef<"BottleTransaction", 'DateTime'>
   }
     
 
@@ -4347,6 +4416,10 @@ export namespace Prisma {
      * Omit specific fields from the BottleTransaction
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
     /**
      * Filter, which BottleTransaction to fetch.
      */
@@ -4366,6 +4439,10 @@ export namespace Prisma {
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
+    /**
      * Filter, which BottleTransaction to fetch.
      */
     where: BottleTransactionWhereUniqueInput
@@ -4383,6 +4460,10 @@ export namespace Prisma {
      * Omit specific fields from the BottleTransaction
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
     /**
      * Filter, which BottleTransaction to fetch.
      */
@@ -4432,6 +4513,10 @@ export namespace Prisma {
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
+    /**
      * Filter, which BottleTransaction to fetch.
      */
     where?: BottleTransactionWhereInput
@@ -4480,6 +4565,10 @@ export namespace Prisma {
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
+    /**
      * Filter, which BottleTransactions to fetch.
      */
     where?: BottleTransactionWhereInput
@@ -4523,6 +4612,10 @@ export namespace Prisma {
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
+    /**
      * The data needed to create a BottleTransaction.
      */
     data: XOR<BottleTransactionCreateInput, BottleTransactionUncheckedCreateInput>
@@ -4556,6 +4649,10 @@ export namespace Prisma {
      */
     data: BottleTransactionCreateManyInput | BottleTransactionCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4570,6 +4667,10 @@ export namespace Prisma {
      * Omit specific fields from the BottleTransaction
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
     /**
      * The data needed to update a BottleTransaction.
      */
@@ -4622,6 +4723,10 @@ export namespace Prisma {
      * Limit how many BottleTransactions to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4636,6 +4741,10 @@ export namespace Prisma {
      * Omit specific fields from the BottleTransaction
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
     /**
      * The filter to search for the BottleTransaction to update in case it exists.
      */
@@ -4662,6 +4771,10 @@ export namespace Prisma {
      * Omit specific fields from the BottleTransaction
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
     /**
      * Filter which BottleTransaction to delete.
      */
@@ -4694,6 +4807,10 @@ export namespace Prisma {
      * Omit specific fields from the BottleTransaction
      */
     omit?: BottleTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BottleTransactionInclude<ExtArgs> | null
   }
 
 
@@ -6935,6 +7052,7 @@ export namespace Prisma {
     deviceId: string | null
     count: number | null
     distance: number | null
+    source: string | null
     timestamp: Date | null
     userBottleCountId: string | null
   }
@@ -6944,6 +7062,7 @@ export namespace Prisma {
     deviceId: string | null
     count: number | null
     distance: number | null
+    source: string | null
     timestamp: Date | null
     userBottleCountId: string | null
   }
@@ -6953,6 +7072,7 @@ export namespace Prisma {
     deviceId: number
     count: number
     distance: number
+    source: number
     timestamp: number
     userBottleCountId: number
     _all: number
@@ -6976,6 +7096,7 @@ export namespace Prisma {
     deviceId?: true
     count?: true
     distance?: true
+    source?: true
     timestamp?: true
     userBottleCountId?: true
   }
@@ -6985,6 +7106,7 @@ export namespace Prisma {
     deviceId?: true
     count?: true
     distance?: true
+    source?: true
     timestamp?: true
     userBottleCountId?: true
   }
@@ -6994,6 +7116,7 @@ export namespace Prisma {
     deviceId?: true
     count?: true
     distance?: true
+    source?: true
     timestamp?: true
     userBottleCountId?: true
     _all?: true
@@ -7090,6 +7213,7 @@ export namespace Prisma {
     deviceId: string
     count: number
     distance: number | null
+    source: string
     timestamp: Date
     userBottleCountId: string | null
     _count: BottleCountCountAggregateOutputType | null
@@ -7118,6 +7242,7 @@ export namespace Prisma {
     deviceId?: boolean
     count?: boolean
     distance?: boolean
+    source?: boolean
     timestamp?: boolean
     userBottleCountId?: boolean
     userBottleCount?: boolean | BottleCount$userBottleCountArgs<ExtArgs>
@@ -7128,6 +7253,7 @@ export namespace Prisma {
     deviceId?: boolean
     count?: boolean
     distance?: boolean
+    source?: boolean
     timestamp?: boolean
     userBottleCountId?: boolean
     userBottleCount?: boolean | BottleCount$userBottleCountArgs<ExtArgs>
@@ -7138,6 +7264,7 @@ export namespace Prisma {
     deviceId?: boolean
     count?: boolean
     distance?: boolean
+    source?: boolean
     timestamp?: boolean
     userBottleCountId?: boolean
     userBottleCount?: boolean | BottleCount$userBottleCountArgs<ExtArgs>
@@ -7148,11 +7275,12 @@ export namespace Prisma {
     deviceId?: boolean
     count?: boolean
     distance?: boolean
+    source?: boolean
     timestamp?: boolean
     userBottleCountId?: boolean
   }
 
-  export type BottleCountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "deviceId" | "count" | "distance" | "timestamp" | "userBottleCountId", ExtArgs["result"]["bottleCount"]>
+  export type BottleCountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "deviceId" | "count" | "distance" | "source" | "timestamp" | "userBottleCountId", ExtArgs["result"]["bottleCount"]>
   export type BottleCountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     userBottleCount?: boolean | BottleCount$userBottleCountArgs<ExtArgs>
   }
@@ -7173,6 +7301,7 @@ export namespace Prisma {
       deviceId: string
       count: number
       distance: number | null
+      source: string
       timestamp: Date
       userBottleCountId: string | null
     }, ExtArgs["result"]["bottleCount"]>
@@ -7603,6 +7732,7 @@ export namespace Prisma {
     readonly deviceId: FieldRef<"BottleCount", 'String'>
     readonly count: FieldRef<"BottleCount", 'Int'>
     readonly distance: FieldRef<"BottleCount", 'Float'>
+    readonly source: FieldRef<"BottleCount", 'String'>
     readonly timestamp: FieldRef<"BottleCount", 'DateTime'>
     readonly userBottleCountId: FieldRef<"BottleCount", 'String'>
   }
@@ -8081,12 +8211,13 @@ export namespace Prisma {
 
   export const BottleTransactionScalarFieldEnum: {
     id: 'id',
-    userId: 'userId',
-    rvmLocationId: 'rvmLocationId',
-    type: 'type',
-    amount: 'amount',
-    description: 'description',
-    createdAt: 'createdAt'
+    userBottleCountId: 'userBottleCountId',
+    bottleCountId: 'bottleCountId',
+    deviceId: 'deviceId',
+    transactionType: 'transactionType',
+    bottleCount: 'bottleCount',
+    pointsEarned: 'pointsEarned',
+    timestamp: 'timestamp'
   };
 
   export type BottleTransactionScalarFieldEnum = (typeof BottleTransactionScalarFieldEnum)[keyof typeof BottleTransactionScalarFieldEnum]
@@ -8130,6 +8261,7 @@ export namespace Prisma {
     deviceId: 'deviceId',
     count: 'count',
     distance: 'distance',
+    source: 'source',
     timestamp: 'timestamp',
     userBottleCountId: 'userBottleCountId'
   };
@@ -8221,20 +8353,6 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'BottleTransactionType'
-   */
-  export type EnumBottleTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BottleTransactionType'>
-    
-
-
-  /**
-   * Reference to a field of type 'BottleTransactionType[]'
-   */
-  export type ListEnumBottleTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BottleTransactionType[]'>
     
 
 
@@ -8347,6 +8465,7 @@ export namespace Prisma {
     lifetimePoints?: IntFilter<"UserBottleCount"> | number
     lastUpdated?: DateTimeFilter<"UserBottleCount"> | Date | string
     bottleCounts?: BottleCountListRelationFilter
+    bottleTransactions?: BottleTransactionListRelationFilter
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
@@ -8360,6 +8479,7 @@ export namespace Prisma {
     lifetimePoints?: SortOrder
     lastUpdated?: SortOrder
     bottleCounts?: BottleCountOrderByRelationAggregateInput
+    bottleTransactions?: BottleTransactionOrderByRelationAggregateInput
     user?: UserOrderByWithRelationInput
   }
 
@@ -8376,6 +8496,7 @@ export namespace Prisma {
     lifetimePoints?: IntFilter<"UserBottleCount"> | number
     lastUpdated?: DateTimeFilter<"UserBottleCount"> | Date | string
     bottleCounts?: BottleCountListRelationFilter
+    bottleTransactions?: BottleTransactionListRelationFilter
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "userId">
 
@@ -8414,22 +8535,26 @@ export namespace Prisma {
     OR?: BottleTransactionWhereInput[]
     NOT?: BottleTransactionWhereInput | BottleTransactionWhereInput[]
     id?: StringFilter<"BottleTransaction"> | string
-    userId?: StringFilter<"BottleTransaction"> | string
-    rvmLocationId?: IntNullableFilter<"BottleTransaction"> | number | null
-    type?: EnumBottleTransactionTypeFilter<"BottleTransaction"> | $Enums.BottleTransactionType
-    amount?: IntFilter<"BottleTransaction"> | number
-    description?: StringNullableFilter<"BottleTransaction"> | string | null
-    createdAt?: DateTimeFilter<"BottleTransaction"> | Date | string
+    userBottleCountId?: StringFilter<"BottleTransaction"> | string
+    bottleCountId?: IntNullableFilter<"BottleTransaction"> | number | null
+    deviceId?: StringNullableFilter<"BottleTransaction"> | string | null
+    transactionType?: StringFilter<"BottleTransaction"> | string
+    bottleCount?: IntFilter<"BottleTransaction"> | number
+    pointsEarned?: IntFilter<"BottleTransaction"> | number
+    timestamp?: DateTimeFilter<"BottleTransaction"> | Date | string
+    userBottleCount?: XOR<UserBottleCountScalarRelationFilter, UserBottleCountWhereInput>
   }
 
   export type BottleTransactionOrderByWithRelationInput = {
     id?: SortOrder
-    userId?: SortOrder
-    rvmLocationId?: SortOrderInput | SortOrder
-    type?: SortOrder
-    amount?: SortOrder
-    description?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
+    userBottleCountId?: SortOrder
+    bottleCountId?: SortOrderInput | SortOrder
+    deviceId?: SortOrderInput | SortOrder
+    transactionType?: SortOrder
+    bottleCount?: SortOrder
+    pointsEarned?: SortOrder
+    timestamp?: SortOrder
+    userBottleCount?: UserBottleCountOrderByWithRelationInput
   }
 
   export type BottleTransactionWhereUniqueInput = Prisma.AtLeast<{
@@ -8437,22 +8562,25 @@ export namespace Prisma {
     AND?: BottleTransactionWhereInput | BottleTransactionWhereInput[]
     OR?: BottleTransactionWhereInput[]
     NOT?: BottleTransactionWhereInput | BottleTransactionWhereInput[]
-    userId?: StringFilter<"BottleTransaction"> | string
-    rvmLocationId?: IntNullableFilter<"BottleTransaction"> | number | null
-    type?: EnumBottleTransactionTypeFilter<"BottleTransaction"> | $Enums.BottleTransactionType
-    amount?: IntFilter<"BottleTransaction"> | number
-    description?: StringNullableFilter<"BottleTransaction"> | string | null
-    createdAt?: DateTimeFilter<"BottleTransaction"> | Date | string
+    userBottleCountId?: StringFilter<"BottleTransaction"> | string
+    bottleCountId?: IntNullableFilter<"BottleTransaction"> | number | null
+    deviceId?: StringNullableFilter<"BottleTransaction"> | string | null
+    transactionType?: StringFilter<"BottleTransaction"> | string
+    bottleCount?: IntFilter<"BottleTransaction"> | number
+    pointsEarned?: IntFilter<"BottleTransaction"> | number
+    timestamp?: DateTimeFilter<"BottleTransaction"> | Date | string
+    userBottleCount?: XOR<UserBottleCountScalarRelationFilter, UserBottleCountWhereInput>
   }, "id">
 
   export type BottleTransactionOrderByWithAggregationInput = {
     id?: SortOrder
-    userId?: SortOrder
-    rvmLocationId?: SortOrderInput | SortOrder
-    type?: SortOrder
-    amount?: SortOrder
-    description?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
+    userBottleCountId?: SortOrder
+    bottleCountId?: SortOrderInput | SortOrder
+    deviceId?: SortOrderInput | SortOrder
+    transactionType?: SortOrder
+    bottleCount?: SortOrder
+    pointsEarned?: SortOrder
+    timestamp?: SortOrder
     _count?: BottleTransactionCountOrderByAggregateInput
     _avg?: BottleTransactionAvgOrderByAggregateInput
     _max?: BottleTransactionMaxOrderByAggregateInput
@@ -8465,12 +8593,13 @@ export namespace Prisma {
     OR?: BottleTransactionScalarWhereWithAggregatesInput[]
     NOT?: BottleTransactionScalarWhereWithAggregatesInput | BottleTransactionScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"BottleTransaction"> | string
-    userId?: StringWithAggregatesFilter<"BottleTransaction"> | string
-    rvmLocationId?: IntNullableWithAggregatesFilter<"BottleTransaction"> | number | null
-    type?: EnumBottleTransactionTypeWithAggregatesFilter<"BottleTransaction"> | $Enums.BottleTransactionType
-    amount?: IntWithAggregatesFilter<"BottleTransaction"> | number
-    description?: StringNullableWithAggregatesFilter<"BottleTransaction"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"BottleTransaction"> | Date | string
+    userBottleCountId?: StringWithAggregatesFilter<"BottleTransaction"> | string
+    bottleCountId?: IntNullableWithAggregatesFilter<"BottleTransaction"> | number | null
+    deviceId?: StringNullableWithAggregatesFilter<"BottleTransaction"> | string | null
+    transactionType?: StringWithAggregatesFilter<"BottleTransaction"> | string
+    bottleCount?: IntWithAggregatesFilter<"BottleTransaction"> | number
+    pointsEarned?: IntWithAggregatesFilter<"BottleTransaction"> | number
+    timestamp?: DateTimeWithAggregatesFilter<"BottleTransaction"> | Date | string
   }
 
   export type ArduinoConnectionWhereInput = {
@@ -8644,6 +8773,7 @@ export namespace Prisma {
     deviceId?: StringFilter<"BottleCount"> | string
     count?: IntFilter<"BottleCount"> | number
     distance?: FloatNullableFilter<"BottleCount"> | number | null
+    source?: StringFilter<"BottleCount"> | string
     timestamp?: DateTimeFilter<"BottleCount"> | Date | string
     userBottleCountId?: StringNullableFilter<"BottleCount"> | string | null
     userBottleCount?: XOR<UserBottleCountNullableScalarRelationFilter, UserBottleCountWhereInput> | null
@@ -8654,6 +8784,7 @@ export namespace Prisma {
     deviceId?: SortOrder
     count?: SortOrder
     distance?: SortOrderInput | SortOrder
+    source?: SortOrder
     timestamp?: SortOrder
     userBottleCountId?: SortOrderInput | SortOrder
     userBottleCount?: UserBottleCountOrderByWithRelationInput
@@ -8667,6 +8798,7 @@ export namespace Prisma {
     deviceId?: StringFilter<"BottleCount"> | string
     count?: IntFilter<"BottleCount"> | number
     distance?: FloatNullableFilter<"BottleCount"> | number | null
+    source?: StringFilter<"BottleCount"> | string
     timestamp?: DateTimeFilter<"BottleCount"> | Date | string
     userBottleCountId?: StringNullableFilter<"BottleCount"> | string | null
     userBottleCount?: XOR<UserBottleCountNullableScalarRelationFilter, UserBottleCountWhereInput> | null
@@ -8677,6 +8809,7 @@ export namespace Prisma {
     deviceId?: SortOrder
     count?: SortOrder
     distance?: SortOrderInput | SortOrder
+    source?: SortOrder
     timestamp?: SortOrder
     userBottleCountId?: SortOrderInput | SortOrder
     _count?: BottleCountCountOrderByAggregateInput
@@ -8694,6 +8827,7 @@ export namespace Prisma {
     deviceId?: StringWithAggregatesFilter<"BottleCount"> | string
     count?: IntWithAggregatesFilter<"BottleCount"> | number
     distance?: FloatNullableWithAggregatesFilter<"BottleCount"> | number | null
+    source?: StringWithAggregatesFilter<"BottleCount"> | string
     timestamp?: DateTimeWithAggregatesFilter<"BottleCount"> | Date | string
     userBottleCountId?: StringNullableWithAggregatesFilter<"BottleCount"> | string | null
   }
@@ -8781,6 +8915,7 @@ export namespace Prisma {
     lifetimePoints?: number
     lastUpdated?: Date | string
     bottleCounts?: BottleCountCreateNestedManyWithoutUserBottleCountInput
+    bottleTransactions?: BottleTransactionCreateNestedManyWithoutUserBottleCountInput
     user: UserCreateNestedOneWithoutBottleCountInput
   }
 
@@ -8794,6 +8929,7 @@ export namespace Prisma {
     lifetimePoints?: number
     lastUpdated?: Date | string
     bottleCounts?: BottleCountUncheckedCreateNestedManyWithoutUserBottleCountInput
+    bottleTransactions?: BottleTransactionUncheckedCreateNestedManyWithoutUserBottleCountInput
   }
 
   export type UserBottleCountUpdateInput = {
@@ -8805,6 +8941,7 @@ export namespace Prisma {
     lifetimePoints?: IntFieldUpdateOperationsInput | number
     lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
     bottleCounts?: BottleCountUpdateManyWithoutUserBottleCountNestedInput
+    bottleTransactions?: BottleTransactionUpdateManyWithoutUserBottleCountNestedInput
     user?: UserUpdateOneRequiredWithoutBottleCountNestedInput
   }
 
@@ -8818,6 +8955,7 @@ export namespace Prisma {
     lifetimePoints?: IntFieldUpdateOperationsInput | number
     lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
     bottleCounts?: BottleCountUncheckedUpdateManyWithoutUserBottleCountNestedInput
+    bottleTransactions?: BottleTransactionUncheckedUpdateManyWithoutUserBottleCountNestedInput
   }
 
   export type UserBottleCountCreateManyInput = {
@@ -8854,72 +8992,78 @@ export namespace Prisma {
 
   export type BottleTransactionCreateInput = {
     id?: string
-    userId: string
-    rvmLocationId?: number | null
-    type: $Enums.BottleTransactionType
-    amount: number
-    description?: string | null
-    createdAt?: Date | string
+    bottleCountId?: number | null
+    deviceId?: string | null
+    transactionType: string
+    bottleCount: number
+    pointsEarned?: number
+    timestamp?: Date | string
+    userBottleCount: UserBottleCountCreateNestedOneWithoutBottleTransactionsInput
   }
 
   export type BottleTransactionUncheckedCreateInput = {
     id?: string
-    userId: string
-    rvmLocationId?: number | null
-    type: $Enums.BottleTransactionType
-    amount: number
-    description?: string | null
-    createdAt?: Date | string
+    userBottleCountId: string
+    bottleCountId?: number | null
+    deviceId?: string | null
+    transactionType: string
+    bottleCount: number
+    pointsEarned?: number
+    timestamp?: Date | string
   }
 
   export type BottleTransactionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    rvmLocationId?: NullableIntFieldUpdateOperationsInput | number | null
-    type?: EnumBottleTransactionTypeFieldUpdateOperationsInput | $Enums.BottleTransactionType
-    amount?: IntFieldUpdateOperationsInput | number
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bottleCountId?: NullableIntFieldUpdateOperationsInput | number | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    transactionType?: StringFieldUpdateOperationsInput | string
+    bottleCount?: IntFieldUpdateOperationsInput | number
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    userBottleCount?: UserBottleCountUpdateOneRequiredWithoutBottleTransactionsNestedInput
   }
 
   export type BottleTransactionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    rvmLocationId?: NullableIntFieldUpdateOperationsInput | number | null
-    type?: EnumBottleTransactionTypeFieldUpdateOperationsInput | $Enums.BottleTransactionType
-    amount?: IntFieldUpdateOperationsInput | number
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userBottleCountId?: StringFieldUpdateOperationsInput | string
+    bottleCountId?: NullableIntFieldUpdateOperationsInput | number | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    transactionType?: StringFieldUpdateOperationsInput | string
+    bottleCount?: IntFieldUpdateOperationsInput | number
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BottleTransactionCreateManyInput = {
     id?: string
-    userId: string
-    rvmLocationId?: number | null
-    type: $Enums.BottleTransactionType
-    amount: number
-    description?: string | null
-    createdAt?: Date | string
+    userBottleCountId: string
+    bottleCountId?: number | null
+    deviceId?: string | null
+    transactionType: string
+    bottleCount: number
+    pointsEarned?: number
+    timestamp?: Date | string
   }
 
   export type BottleTransactionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    rvmLocationId?: NullableIntFieldUpdateOperationsInput | number | null
-    type?: EnumBottleTransactionTypeFieldUpdateOperationsInput | $Enums.BottleTransactionType
-    amount?: IntFieldUpdateOperationsInput | number
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bottleCountId?: NullableIntFieldUpdateOperationsInput | number | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    transactionType?: StringFieldUpdateOperationsInput | string
+    bottleCount?: IntFieldUpdateOperationsInput | number
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BottleTransactionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    rvmLocationId?: NullableIntFieldUpdateOperationsInput | number | null
-    type?: EnumBottleTransactionTypeFieldUpdateOperationsInput | $Enums.BottleTransactionType
-    amount?: IntFieldUpdateOperationsInput | number
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userBottleCountId?: StringFieldUpdateOperationsInput | string
+    bottleCountId?: NullableIntFieldUpdateOperationsInput | number | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    transactionType?: StringFieldUpdateOperationsInput | string
+    bottleCount?: IntFieldUpdateOperationsInput | number
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ArduinoConnectionCreateInput = {
@@ -9109,6 +9253,7 @@ export namespace Prisma {
     deviceId: string
     count?: number
     distance?: number | null
+    source?: string
     timestamp?: Date | string
     userBottleCount?: UserBottleCountCreateNestedOneWithoutBottleCountsInput
   }
@@ -9118,6 +9263,7 @@ export namespace Prisma {
     deviceId: string
     count?: number
     distance?: number | null
+    source?: string
     timestamp?: Date | string
     userBottleCountId?: string | null
   }
@@ -9126,6 +9272,7 @@ export namespace Prisma {
     deviceId?: StringFieldUpdateOperationsInput | string
     count?: IntFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
+    source?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     userBottleCount?: UserBottleCountUpdateOneWithoutBottleCountsNestedInput
   }
@@ -9135,6 +9282,7 @@ export namespace Prisma {
     deviceId?: StringFieldUpdateOperationsInput | string
     count?: IntFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
+    source?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     userBottleCountId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -9144,6 +9292,7 @@ export namespace Prisma {
     deviceId: string
     count?: number
     distance?: number | null
+    source?: string
     timestamp?: Date | string
     userBottleCountId?: string | null
   }
@@ -9152,6 +9301,7 @@ export namespace Prisma {
     deviceId?: StringFieldUpdateOperationsInput | string
     count?: IntFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
+    source?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -9160,6 +9310,7 @@ export namespace Prisma {
     deviceId?: StringFieldUpdateOperationsInput | string
     count?: IntFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
+    source?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     userBottleCountId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -9274,12 +9425,22 @@ export namespace Prisma {
     none?: BottleCountWhereInput
   }
 
+  export type BottleTransactionListRelationFilter = {
+    every?: BottleTransactionWhereInput
+    some?: BottleTransactionWhereInput
+    none?: BottleTransactionWhereInput
+  }
+
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
   }
 
   export type BottleCountOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type BottleTransactionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -9359,13 +9520,6 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type EnumBottleTransactionTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.BottleTransactionType | EnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.BottleTransactionType[] | ListEnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.BottleTransactionType[] | ListEnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumBottleTransactionTypeFilter<$PrismaModel> | $Enums.BottleTransactionType
-  }
-
   export type StringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -9381,6 +9535,11 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type UserBottleCountScalarRelationFilter = {
+    is?: UserBottleCountWhereInput
+    isNot?: UserBottleCountWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -9388,42 +9547,47 @@ export namespace Prisma {
 
   export type BottleTransactionCountOrderByAggregateInput = {
     id?: SortOrder
-    userId?: SortOrder
-    rvmLocationId?: SortOrder
-    type?: SortOrder
-    amount?: SortOrder
-    description?: SortOrder
-    createdAt?: SortOrder
+    userBottleCountId?: SortOrder
+    bottleCountId?: SortOrder
+    deviceId?: SortOrder
+    transactionType?: SortOrder
+    bottleCount?: SortOrder
+    pointsEarned?: SortOrder
+    timestamp?: SortOrder
   }
 
   export type BottleTransactionAvgOrderByAggregateInput = {
-    rvmLocationId?: SortOrder
-    amount?: SortOrder
+    bottleCountId?: SortOrder
+    bottleCount?: SortOrder
+    pointsEarned?: SortOrder
   }
 
   export type BottleTransactionMaxOrderByAggregateInput = {
     id?: SortOrder
-    userId?: SortOrder
-    rvmLocationId?: SortOrder
-    type?: SortOrder
-    amount?: SortOrder
-    description?: SortOrder
-    createdAt?: SortOrder
+    userBottleCountId?: SortOrder
+    bottleCountId?: SortOrder
+    deviceId?: SortOrder
+    transactionType?: SortOrder
+    bottleCount?: SortOrder
+    pointsEarned?: SortOrder
+    timestamp?: SortOrder
   }
 
   export type BottleTransactionMinOrderByAggregateInput = {
     id?: SortOrder
-    userId?: SortOrder
-    rvmLocationId?: SortOrder
-    type?: SortOrder
-    amount?: SortOrder
-    description?: SortOrder
-    createdAt?: SortOrder
+    userBottleCountId?: SortOrder
+    bottleCountId?: SortOrder
+    deviceId?: SortOrder
+    transactionType?: SortOrder
+    bottleCount?: SortOrder
+    pointsEarned?: SortOrder
+    timestamp?: SortOrder
   }
 
   export type BottleTransactionSumOrderByAggregateInput = {
-    rvmLocationId?: SortOrder
-    amount?: SortOrder
+    bottleCountId?: SortOrder
+    bottleCount?: SortOrder
+    pointsEarned?: SortOrder
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -9440,16 +9604,6 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type EnumBottleTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.BottleTransactionType | EnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.BottleTransactionType[] | ListEnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.BottleTransactionType[] | ListEnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumBottleTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.BottleTransactionType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumBottleTransactionTypeFilter<$PrismaModel>
-    _max?: NestedEnumBottleTransactionTypeFilter<$PrismaModel>
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -9636,6 +9790,7 @@ export namespace Prisma {
     deviceId?: SortOrder
     count?: SortOrder
     distance?: SortOrder
+    source?: SortOrder
     timestamp?: SortOrder
     userBottleCountId?: SortOrder
   }
@@ -9651,6 +9806,7 @@ export namespace Prisma {
     deviceId?: SortOrder
     count?: SortOrder
     distance?: SortOrder
+    source?: SortOrder
     timestamp?: SortOrder
     userBottleCountId?: SortOrder
   }
@@ -9660,6 +9816,7 @@ export namespace Prisma {
     deviceId?: SortOrder
     count?: SortOrder
     distance?: SortOrder
+    source?: SortOrder
     timestamp?: SortOrder
     userBottleCountId?: SortOrder
   }
@@ -9733,6 +9890,13 @@ export namespace Prisma {
     connect?: BottleCountWhereUniqueInput | BottleCountWhereUniqueInput[]
   }
 
+  export type BottleTransactionCreateNestedManyWithoutUserBottleCountInput = {
+    create?: XOR<BottleTransactionCreateWithoutUserBottleCountInput, BottleTransactionUncheckedCreateWithoutUserBottleCountInput> | BottleTransactionCreateWithoutUserBottleCountInput[] | BottleTransactionUncheckedCreateWithoutUserBottleCountInput[]
+    connectOrCreate?: BottleTransactionCreateOrConnectWithoutUserBottleCountInput | BottleTransactionCreateOrConnectWithoutUserBottleCountInput[]
+    createMany?: BottleTransactionCreateManyUserBottleCountInputEnvelope
+    connect?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
+  }
+
   export type UserCreateNestedOneWithoutBottleCountInput = {
     create?: XOR<UserCreateWithoutBottleCountInput, UserUncheckedCreateWithoutBottleCountInput>
     connectOrCreate?: UserCreateOrConnectWithoutBottleCountInput
@@ -9744,6 +9908,13 @@ export namespace Prisma {
     connectOrCreate?: BottleCountCreateOrConnectWithoutUserBottleCountInput | BottleCountCreateOrConnectWithoutUserBottleCountInput[]
     createMany?: BottleCountCreateManyUserBottleCountInputEnvelope
     connect?: BottleCountWhereUniqueInput | BottleCountWhereUniqueInput[]
+  }
+
+  export type BottleTransactionUncheckedCreateNestedManyWithoutUserBottleCountInput = {
+    create?: XOR<BottleTransactionCreateWithoutUserBottleCountInput, BottleTransactionUncheckedCreateWithoutUserBottleCountInput> | BottleTransactionCreateWithoutUserBottleCountInput[] | BottleTransactionUncheckedCreateWithoutUserBottleCountInput[]
+    connectOrCreate?: BottleTransactionCreateOrConnectWithoutUserBottleCountInput | BottleTransactionCreateOrConnectWithoutUserBottleCountInput[]
+    createMany?: BottleTransactionCreateManyUserBottleCountInputEnvelope
+    connect?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -9768,6 +9939,20 @@ export namespace Prisma {
     deleteMany?: BottleCountScalarWhereInput | BottleCountScalarWhereInput[]
   }
 
+  export type BottleTransactionUpdateManyWithoutUserBottleCountNestedInput = {
+    create?: XOR<BottleTransactionCreateWithoutUserBottleCountInput, BottleTransactionUncheckedCreateWithoutUserBottleCountInput> | BottleTransactionCreateWithoutUserBottleCountInput[] | BottleTransactionUncheckedCreateWithoutUserBottleCountInput[]
+    connectOrCreate?: BottleTransactionCreateOrConnectWithoutUserBottleCountInput | BottleTransactionCreateOrConnectWithoutUserBottleCountInput[]
+    upsert?: BottleTransactionUpsertWithWhereUniqueWithoutUserBottleCountInput | BottleTransactionUpsertWithWhereUniqueWithoutUserBottleCountInput[]
+    createMany?: BottleTransactionCreateManyUserBottleCountInputEnvelope
+    set?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
+    disconnect?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
+    delete?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
+    connect?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
+    update?: BottleTransactionUpdateWithWhereUniqueWithoutUserBottleCountInput | BottleTransactionUpdateWithWhereUniqueWithoutUserBottleCountInput[]
+    updateMany?: BottleTransactionUpdateManyWithWhereWithoutUserBottleCountInput | BottleTransactionUpdateManyWithWhereWithoutUserBottleCountInput[]
+    deleteMany?: BottleTransactionScalarWhereInput | BottleTransactionScalarWhereInput[]
+  }
+
   export type UserUpdateOneRequiredWithoutBottleCountNestedInput = {
     create?: XOR<UserCreateWithoutBottleCountInput, UserUncheckedCreateWithoutBottleCountInput>
     connectOrCreate?: UserCreateOrConnectWithoutBottleCountInput
@@ -9790,6 +9975,26 @@ export namespace Prisma {
     deleteMany?: BottleCountScalarWhereInput | BottleCountScalarWhereInput[]
   }
 
+  export type BottleTransactionUncheckedUpdateManyWithoutUserBottleCountNestedInput = {
+    create?: XOR<BottleTransactionCreateWithoutUserBottleCountInput, BottleTransactionUncheckedCreateWithoutUserBottleCountInput> | BottleTransactionCreateWithoutUserBottleCountInput[] | BottleTransactionUncheckedCreateWithoutUserBottleCountInput[]
+    connectOrCreate?: BottleTransactionCreateOrConnectWithoutUserBottleCountInput | BottleTransactionCreateOrConnectWithoutUserBottleCountInput[]
+    upsert?: BottleTransactionUpsertWithWhereUniqueWithoutUserBottleCountInput | BottleTransactionUpsertWithWhereUniqueWithoutUserBottleCountInput[]
+    createMany?: BottleTransactionCreateManyUserBottleCountInputEnvelope
+    set?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
+    disconnect?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
+    delete?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
+    connect?: BottleTransactionWhereUniqueInput | BottleTransactionWhereUniqueInput[]
+    update?: BottleTransactionUpdateWithWhereUniqueWithoutUserBottleCountInput | BottleTransactionUpdateWithWhereUniqueWithoutUserBottleCountInput[]
+    updateMany?: BottleTransactionUpdateManyWithWhereWithoutUserBottleCountInput | BottleTransactionUpdateManyWithWhereWithoutUserBottleCountInput[]
+    deleteMany?: BottleTransactionScalarWhereInput | BottleTransactionScalarWhereInput[]
+  }
+
+  export type UserBottleCountCreateNestedOneWithoutBottleTransactionsInput = {
+    create?: XOR<UserBottleCountCreateWithoutBottleTransactionsInput, UserBottleCountUncheckedCreateWithoutBottleTransactionsInput>
+    connectOrCreate?: UserBottleCountCreateOrConnectWithoutBottleTransactionsInput
+    connect?: UserBottleCountWhereUniqueInput
+  }
+
   export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -9798,12 +10003,16 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type EnumBottleTransactionTypeFieldUpdateOperationsInput = {
-    set?: $Enums.BottleTransactionType
-  }
-
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+  }
+
+  export type UserBottleCountUpdateOneRequiredWithoutBottleTransactionsNestedInput = {
+    create?: XOR<UserBottleCountCreateWithoutBottleTransactionsInput, UserBottleCountUncheckedCreateWithoutBottleTransactionsInput>
+    connectOrCreate?: UserBottleCountCreateOrConnectWithoutBottleTransactionsInput
+    upsert?: UserBottleCountUpsertWithoutBottleTransactionsInput
+    connect?: UserBottleCountWhereUniqueInput
+    update?: XOR<XOR<UserBottleCountUpdateToOneWithWhereWithoutBottleTransactionsInput, UserBottleCountUpdateWithoutBottleTransactionsInput>, UserBottleCountUncheckedUpdateWithoutBottleTransactionsInput>
   }
 
   export type UserBottleCountCreateNestedOneWithoutBottleCountsInput = {
@@ -9935,13 +10144,6 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedEnumBottleTransactionTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.BottleTransactionType | EnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.BottleTransactionType[] | ListEnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.BottleTransactionType[] | ListEnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumBottleTransactionTypeFilter<$PrismaModel> | $Enums.BottleTransactionType
-  }
-
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -9981,16 +10183,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedEnumBottleTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.BottleTransactionType | EnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.BottleTransactionType[] | ListEnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.BottleTransactionType[] | ListEnumBottleTransactionTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumBottleTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.BottleTransactionType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumBottleTransactionTypeFilter<$PrismaModel>
-    _max?: NestedEnumBottleTransactionTypeFilter<$PrismaModel>
   }
 
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -10058,6 +10250,7 @@ export namespace Prisma {
     lifetimePoints?: number
     lastUpdated?: Date | string
     bottleCounts?: BottleCountCreateNestedManyWithoutUserBottleCountInput
+    bottleTransactions?: BottleTransactionCreateNestedManyWithoutUserBottleCountInput
   }
 
   export type UserBottleCountUncheckedCreateWithoutUserInput = {
@@ -10069,6 +10262,7 @@ export namespace Prisma {
     lifetimePoints?: number
     lastUpdated?: Date | string
     bottleCounts?: BottleCountUncheckedCreateNestedManyWithoutUserBottleCountInput
+    bottleTransactions?: BottleTransactionUncheckedCreateNestedManyWithoutUserBottleCountInput
   }
 
   export type UserBottleCountCreateOrConnectWithoutUserInput = {
@@ -10096,6 +10290,7 @@ export namespace Prisma {
     lifetimePoints?: IntFieldUpdateOperationsInput | number
     lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
     bottleCounts?: BottleCountUpdateManyWithoutUserBottleCountNestedInput
+    bottleTransactions?: BottleTransactionUpdateManyWithoutUserBottleCountNestedInput
   }
 
   export type UserBottleCountUncheckedUpdateWithoutUserInput = {
@@ -10107,12 +10302,14 @@ export namespace Prisma {
     lifetimePoints?: IntFieldUpdateOperationsInput | number
     lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
     bottleCounts?: BottleCountUncheckedUpdateManyWithoutUserBottleCountNestedInput
+    bottleTransactions?: BottleTransactionUncheckedUpdateManyWithoutUserBottleCountNestedInput
   }
 
   export type BottleCountCreateWithoutUserBottleCountInput = {
     deviceId: string
     count?: number
     distance?: number | null
+    source?: string
     timestamp?: Date | string
   }
 
@@ -10121,6 +10318,7 @@ export namespace Prisma {
     deviceId: string
     count?: number
     distance?: number | null
+    source?: string
     timestamp?: Date | string
   }
 
@@ -10131,6 +10329,36 @@ export namespace Prisma {
 
   export type BottleCountCreateManyUserBottleCountInputEnvelope = {
     data: BottleCountCreateManyUserBottleCountInput | BottleCountCreateManyUserBottleCountInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BottleTransactionCreateWithoutUserBottleCountInput = {
+    id?: string
+    bottleCountId?: number | null
+    deviceId?: string | null
+    transactionType: string
+    bottleCount: number
+    pointsEarned?: number
+    timestamp?: Date | string
+  }
+
+  export type BottleTransactionUncheckedCreateWithoutUserBottleCountInput = {
+    id?: string
+    bottleCountId?: number | null
+    deviceId?: string | null
+    transactionType: string
+    bottleCount: number
+    pointsEarned?: number
+    timestamp?: Date | string
+  }
+
+  export type BottleTransactionCreateOrConnectWithoutUserBottleCountInput = {
+    where: BottleTransactionWhereUniqueInput
+    create: XOR<BottleTransactionCreateWithoutUserBottleCountInput, BottleTransactionUncheckedCreateWithoutUserBottleCountInput>
+  }
+
+  export type BottleTransactionCreateManyUserBottleCountInputEnvelope = {
+    data: BottleTransactionCreateManyUserBottleCountInput | BottleTransactionCreateManyUserBottleCountInput[]
     skipDuplicates?: boolean
   }
 
@@ -10183,8 +10411,39 @@ export namespace Prisma {
     deviceId?: StringFilter<"BottleCount"> | string
     count?: IntFilter<"BottleCount"> | number
     distance?: FloatNullableFilter<"BottleCount"> | number | null
+    source?: StringFilter<"BottleCount"> | string
     timestamp?: DateTimeFilter<"BottleCount"> | Date | string
     userBottleCountId?: StringNullableFilter<"BottleCount"> | string | null
+  }
+
+  export type BottleTransactionUpsertWithWhereUniqueWithoutUserBottleCountInput = {
+    where: BottleTransactionWhereUniqueInput
+    update: XOR<BottleTransactionUpdateWithoutUserBottleCountInput, BottleTransactionUncheckedUpdateWithoutUserBottleCountInput>
+    create: XOR<BottleTransactionCreateWithoutUserBottleCountInput, BottleTransactionUncheckedCreateWithoutUserBottleCountInput>
+  }
+
+  export type BottleTransactionUpdateWithWhereUniqueWithoutUserBottleCountInput = {
+    where: BottleTransactionWhereUniqueInput
+    data: XOR<BottleTransactionUpdateWithoutUserBottleCountInput, BottleTransactionUncheckedUpdateWithoutUserBottleCountInput>
+  }
+
+  export type BottleTransactionUpdateManyWithWhereWithoutUserBottleCountInput = {
+    where: BottleTransactionScalarWhereInput
+    data: XOR<BottleTransactionUpdateManyMutationInput, BottleTransactionUncheckedUpdateManyWithoutUserBottleCountInput>
+  }
+
+  export type BottleTransactionScalarWhereInput = {
+    AND?: BottleTransactionScalarWhereInput | BottleTransactionScalarWhereInput[]
+    OR?: BottleTransactionScalarWhereInput[]
+    NOT?: BottleTransactionScalarWhereInput | BottleTransactionScalarWhereInput[]
+    id?: StringFilter<"BottleTransaction"> | string
+    userBottleCountId?: StringFilter<"BottleTransaction"> | string
+    bottleCountId?: IntNullableFilter<"BottleTransaction"> | number | null
+    deviceId?: StringNullableFilter<"BottleTransaction"> | string | null
+    transactionType?: StringFilter<"BottleTransaction"> | string
+    bottleCount?: IntFilter<"BottleTransaction"> | number
+    pointsEarned?: IntFilter<"BottleTransaction"> | number
+    timestamp?: DateTimeFilter<"BottleTransaction"> | Date | string
   }
 
   export type UserUpsertWithoutBottleCountInput = {
@@ -10218,6 +10477,70 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserBottleCountCreateWithoutBottleTransactionsInput = {
+    id?: string
+    totalBottles?: number
+    redeemableCount?: number
+    lifetimeCount?: number
+    points?: number
+    lifetimePoints?: number
+    lastUpdated?: Date | string
+    bottleCounts?: BottleCountCreateNestedManyWithoutUserBottleCountInput
+    user: UserCreateNestedOneWithoutBottleCountInput
+  }
+
+  export type UserBottleCountUncheckedCreateWithoutBottleTransactionsInput = {
+    id?: string
+    userId: string
+    totalBottles?: number
+    redeemableCount?: number
+    lifetimeCount?: number
+    points?: number
+    lifetimePoints?: number
+    lastUpdated?: Date | string
+    bottleCounts?: BottleCountUncheckedCreateNestedManyWithoutUserBottleCountInput
+  }
+
+  export type UserBottleCountCreateOrConnectWithoutBottleTransactionsInput = {
+    where: UserBottleCountWhereUniqueInput
+    create: XOR<UserBottleCountCreateWithoutBottleTransactionsInput, UserBottleCountUncheckedCreateWithoutBottleTransactionsInput>
+  }
+
+  export type UserBottleCountUpsertWithoutBottleTransactionsInput = {
+    update: XOR<UserBottleCountUpdateWithoutBottleTransactionsInput, UserBottleCountUncheckedUpdateWithoutBottleTransactionsInput>
+    create: XOR<UserBottleCountCreateWithoutBottleTransactionsInput, UserBottleCountUncheckedCreateWithoutBottleTransactionsInput>
+    where?: UserBottleCountWhereInput
+  }
+
+  export type UserBottleCountUpdateToOneWithWhereWithoutBottleTransactionsInput = {
+    where?: UserBottleCountWhereInput
+    data: XOR<UserBottleCountUpdateWithoutBottleTransactionsInput, UserBottleCountUncheckedUpdateWithoutBottleTransactionsInput>
+  }
+
+  export type UserBottleCountUpdateWithoutBottleTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    totalBottles?: IntFieldUpdateOperationsInput | number
+    redeemableCount?: IntFieldUpdateOperationsInput | number
+    lifetimeCount?: IntFieldUpdateOperationsInput | number
+    points?: IntFieldUpdateOperationsInput | number
+    lifetimePoints?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+    bottleCounts?: BottleCountUpdateManyWithoutUserBottleCountNestedInput
+    user?: UserUpdateOneRequiredWithoutBottleCountNestedInput
+  }
+
+  export type UserBottleCountUncheckedUpdateWithoutBottleTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    totalBottles?: IntFieldUpdateOperationsInput | number
+    redeemableCount?: IntFieldUpdateOperationsInput | number
+    lifetimeCount?: IntFieldUpdateOperationsInput | number
+    points?: IntFieldUpdateOperationsInput | number
+    lifetimePoints?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+    bottleCounts?: BottleCountUncheckedUpdateManyWithoutUserBottleCountNestedInput
+  }
+
   export type UserBottleCountCreateWithoutBottleCountsInput = {
     id?: string
     totalBottles?: number
@@ -10226,6 +10549,7 @@ export namespace Prisma {
     points?: number
     lifetimePoints?: number
     lastUpdated?: Date | string
+    bottleTransactions?: BottleTransactionCreateNestedManyWithoutUserBottleCountInput
     user: UserCreateNestedOneWithoutBottleCountInput
   }
 
@@ -10238,6 +10562,7 @@ export namespace Prisma {
     points?: number
     lifetimePoints?: number
     lastUpdated?: Date | string
+    bottleTransactions?: BottleTransactionUncheckedCreateNestedManyWithoutUserBottleCountInput
   }
 
   export type UserBottleCountCreateOrConnectWithoutBottleCountsInput = {
@@ -10264,6 +10589,7 @@ export namespace Prisma {
     points?: IntFieldUpdateOperationsInput | number
     lifetimePoints?: IntFieldUpdateOperationsInput | number
     lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+    bottleTransactions?: BottleTransactionUpdateManyWithoutUserBottleCountNestedInput
     user?: UserUpdateOneRequiredWithoutBottleCountNestedInput
   }
 
@@ -10276,6 +10602,7 @@ export namespace Prisma {
     points?: IntFieldUpdateOperationsInput | number
     lifetimePoints?: IntFieldUpdateOperationsInput | number
     lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+    bottleTransactions?: BottleTransactionUncheckedUpdateManyWithoutUserBottleCountNestedInput
   }
 
   export type BottleCountCreateManyUserBottleCountInput = {
@@ -10283,6 +10610,17 @@ export namespace Prisma {
     deviceId: string
     count?: number
     distance?: number | null
+    source?: string
+    timestamp?: Date | string
+  }
+
+  export type BottleTransactionCreateManyUserBottleCountInput = {
+    id?: string
+    bottleCountId?: number | null
+    deviceId?: string | null
+    transactionType: string
+    bottleCount: number
+    pointsEarned?: number
     timestamp?: Date | string
   }
 
@@ -10290,6 +10628,7 @@ export namespace Prisma {
     deviceId?: StringFieldUpdateOperationsInput | string
     count?: IntFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
+    source?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -10298,6 +10637,7 @@ export namespace Prisma {
     deviceId?: StringFieldUpdateOperationsInput | string
     count?: IntFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
+    source?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -10306,6 +10646,37 @@ export namespace Prisma {
     deviceId?: StringFieldUpdateOperationsInput | string
     count?: IntFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
+    source?: StringFieldUpdateOperationsInput | string
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BottleTransactionUpdateWithoutUserBottleCountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    bottleCountId?: NullableIntFieldUpdateOperationsInput | number | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    transactionType?: StringFieldUpdateOperationsInput | string
+    bottleCount?: IntFieldUpdateOperationsInput | number
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BottleTransactionUncheckedUpdateWithoutUserBottleCountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    bottleCountId?: NullableIntFieldUpdateOperationsInput | number | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    transactionType?: StringFieldUpdateOperationsInput | string
+    bottleCount?: IntFieldUpdateOperationsInput | number
+    pointsEarned?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BottleTransactionUncheckedUpdateManyWithoutUserBottleCountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    bottleCountId?: NullableIntFieldUpdateOperationsInput | number | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    transactionType?: StringFieldUpdateOperationsInput | string
+    bottleCount?: IntFieldUpdateOperationsInput | number
+    pointsEarned?: IntFieldUpdateOperationsInput | number
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

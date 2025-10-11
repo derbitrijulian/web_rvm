@@ -143,12 +143,13 @@ exports.Prisma.UserBottleCountScalarFieldEnum = {
 
 exports.Prisma.BottleTransactionScalarFieldEnum = {
   id: 'id',
-  userId: 'userId',
-  rvmLocationId: 'rvmLocationId',
-  type: 'type',
-  amount: 'amount',
-  description: 'description',
-  createdAt: 'createdAt'
+  userBottleCountId: 'userBottleCountId',
+  bottleCountId: 'bottleCountId',
+  deviceId: 'deviceId',
+  transactionType: 'transactionType',
+  bottleCount: 'bottleCount',
+  pointsEarned: 'pointsEarned',
+  timestamp: 'timestamp'
 };
 
 exports.Prisma.ArduinoConnectionScalarFieldEnum = {
@@ -183,6 +184,7 @@ exports.Prisma.BottleCountScalarFieldEnum = {
   deviceId: 'deviceId',
   count: 'count',
   distance: 'distance',
+  source: 'source',
   timestamp: 'timestamp',
   userBottleCountId: 'userBottleCountId'
 };
@@ -211,11 +213,7 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
-exports.BottleTransactionType = exports.$Enums.BottleTransactionType = {
-  DEPOSIT: 'DEPOSIT',
-  REDEEM: 'REDEEM',
-  ADJUSTMENT: 'ADJUSTMENT'
-};
+
 
 exports.Prisma.ModelName = {
   User: 'User',

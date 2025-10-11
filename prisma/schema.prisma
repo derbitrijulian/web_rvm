@@ -21,16 +21,18 @@ model User {
 }
 
 model UserBottleCount {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  totalBottles    Int      @default(0)
-  redeemableCount Int      @default(0)
-  lifetimeCount   Int      @default(0)
-  points          Int      @default(0)
-  lifetimePoints  Int      @default(0)
-  lastUpdated     DateTime @default(now()) @updatedAt
-   bottleCounts    BottleCount[] 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String              @id @default(uuid())
+  userId            String              @unique
+  totalBottles      Int                 @default(0)
+  redeemableCount   Int                 @default(0)
+  lifetimeCount     Int                 @default(0)
+  points            Int                 @default(0)
+  lifetimePoints    Int                 @default(0)
+  lastUpdated       DateTime            @default(now()) @updatedAt
+  
+  bottleCounts      BottleCount[] 
+  bottleTransactions BottleTransaction[]
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_bottle_counts")
 }
@@ -38,13 +40,16 @@ model UserBottleCount {
 
 
 model BottleTransaction {
-  id            String                @id @default(uuid())
-  userId        String
-  rvmLocationId Int?
-  type          BottleTransactionType
-  amount        Int
-  description   String?
-  createdAt     DateTime              @default(now())
+  id                String                @id @default(uuid())
+  userBottleCountId String
+  bottleCountId     Int?                  // Reference to BottleCount
+  deviceId          String?
+  transactionType   String                // "deposit", "redeem", "adjustment"
+  bottleCount       Int
+  pointsEarned      Int                   @default(0)
+  timestamp         DateTime              @default(now())
+  
+  userBottleCount   UserBottleCount       @relation(fields: [userBottleCountId], references: [id], onDelete: Cascade)
 
   @@map("bottle_transactions")
 }
@@ -89,6 +94,7 @@ model BottleCount {
   deviceId    String   // "ARDUINO_RVM_1"
   count       Int      @default(1) // jumlah botol yang dideteksi
   distance    Float?   // jarak sensor saat deteksi (opsional)
+  source      String   @default("arduino") // "arduino", "manual", "system"
   timestamp   DateTime @default(now())
    userBottleCountId  String?          
   userBottleCount    UserBottleCount?    @relation(fields: [userBottleCountId], references: [id], onDelete: Cascade)
