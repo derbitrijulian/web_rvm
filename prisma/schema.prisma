@@ -1,10 +1,12 @@
 generator client {
   provider = "prisma-client-js"
+  output = "../prisma/generated/prisma"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -15,8 +17,6 @@ model User {
   password    String
   phoneNumber String           @map("phone_number")
   updatedAt   DateTime         @updatedAt
-  
-  // Relasi one-to-one dengan UserBottleCount
   bottleCount UserBottleCount?
 }
 
@@ -26,40 +26,72 @@ model UserBottleCount {
   totalBottles    Int      @default(0)
   redeemableCount Int      @default(0)
   lifetimeCount   Int      @default(0)
+  points          Int      @default(0)
+  lifetimePoints  Int      @default(0)
   lastUpdated     DateTime @default(now()) @updatedAt
-  
-  // Relasi dengan User
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+   bottleCounts    BottleCount[] 
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("user_bottle_counts")
 }
 
+
+
 model BottleTransaction {
-  id            String              @id @default(uuid())
+  id            String                @id @default(uuid())
   userId        String
   rvmLocationId Int?
   type          BottleTransactionType
   amount        Int
   description   String?
-  createdAt     DateTime            @default(now())
-  
-  // Relasi dengan User (tanpa foreign key constraint untuk fleksibilitas)
+  createdAt     DateTime              @default(now())
+
   @@map("bottle_transactions")
 }
 
-enum BottleTransactionType {
-  DEPOSIT   // Menambah bottle (dari RVM)
-  REDEEM    // Menukar bottle dengan reward
-  ADJUSTMENT // Penyesuaian manual
+model ArduinoConnection {
+  id          Int      @id @default(autoincrement())
+  deviceId    String   // misalnya "ARDUINO_RVM_1"
+  locationId  Int?     // bisa null kalau belum ditentukan
+  ipAddress   String?  // alamat IP Arduino yang connect
+  status      String   // "CONNECTED", "DISCONNECTED", "FAILED"
+  lastPing    DateTime @default(now()) // waktu terakhir Arduino connect
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
+
 model RvmLocation {
-  id             Int      @id @default(autoincrement())
-  name           String
-  position       Json
-  capacity       Int
-  capacityStatus String
-  image          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now()) @updatedAt
+  id               Int      @id @default(autoincrement())
+  name             String
+  address          String?
+  position         Json
+  capacity         Int      @default(100)
+  currentStock     Int      @default(0)
+  capacityStatus   String   @default("AVAILABLE")
+  operationalHours String   @default("08:00-22:00")
+  contactNumber    String?
+  status           String   @default("ACTIVE")
+  image            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("rvm_locations")
+}
+enum BottleTransactionType {
+  DEPOSIT
+  REDEEM
+  ADJUSTMENT
+}
+
+model BottleCount {
+  id          Int      @id @default(autoincrement())
+  deviceId    String   // "ARDUINO_RVM_1"
+  count       Int      @default(1) // jumlah botol yang dideteksi
+  distance    Float?   // jarak sensor saat deteksi (opsional)
+  timestamp   DateTime @default(now())
+   userBottleCountId  String?          
+  userBottleCount    UserBottleCount?    @relation(fields: [userBottleCountId], references: [id], onDelete: Cascade)
+  
+  @@map("bottle_counts")
 }
