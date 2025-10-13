@@ -211,13 +211,7 @@ export default function RedeemGopayPage() {
               </div>
             </div>
 
-            <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-green-600">
-                  {loading ? '...' : userStats.points.toLocaleString()}
-                </p>
-                <p className="text-xs text-gray-600">Total Poin</p>
-              </div>
+            <div className="flex justify-center mt-6 pt-4 border-t border-gray-200">
               <div className="text-center">
                 <p
                   className={`text-2xl font-bold transition-all duration-500 ${
@@ -238,23 +232,6 @@ export default function RedeemGopayPage() {
             )}
           </div>
 
-          {/* Session Summary */}
-          <div className="bg-gray-50 rounded-xl p-4 mb-6">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
-                <p className="text-lg font-bold text-text-primary">
-                  {loading ? '...' : userStats.totalBottles}
-                </p>
-                <p className="text-xs text-gray-600">Total Botol</p>
-              </div>
-              <div>
-                <p className="text-lg font-bold text-text-primary">
-                  {loading ? '...' : userStats.lifetimePoints.toLocaleString()}
-                </p>
-                <p className="text-xs text-gray-600">Lifetime Poin</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Claim Bottles */}

@@ -145,35 +145,6 @@ export default function ProfilePage() {
               </h1>
               <p className="text-gray-600 text-sm">{userDetail?.email}</p>
               <p className="text-gray-600 text-sm">{userDetail?.phoneNumber}</p>
-
-              {/* Bottle Count Info */}
-              {userDetail?.bottleCount && (
-                <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                  <h3 className="text-green-800 font-semibold mb-2">
-                    Bottle Statistics
-                  </h3>
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <p className="text-green-600 font-bold text-lg">
-                        {userDetail.bottleCount.totalBottles}
-                      </p>
-                      <p className="text-green-600 text-xs">Total</p>
-                    </div>
-                    <div>
-                      <p className="text-blue-600 font-bold text-lg">
-                        {userDetail.bottleCount.redeemableCount}
-                      </p>
-                      <p className="text-blue-600 text-xs">Available</p>
-                    </div>
-                    <div>
-                      <p className="text-purple-600 font-bold text-lg">
-                        {userDetail.bottleCount.lifetimeCount}
-                      </p>
-                      <p className="text-purple-600 text-xs">Lifetime</p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Options */}

@@ -34,7 +34,7 @@ export default function Page() {
   const sessionBottles = claimResult?.bottlesAdded || redeemableCount;
   const sessionPoints = claimResult?.pointsEarned || redeemableCount * 50;
 
-  // You might need to fetch user details separately if not included in bottle-count API
+  // Fetch user details from profile API
   const [userData, userLoading, userError] = useFetch('/api/user/profile');
 
   useEffect(() => {
@@ -56,6 +56,16 @@ export default function Page() {
 
   console.log('Receipt data:', data);
   console.log('User data:', userData);
+  console.log('User error:', userError);
+
+  // Get the actual user name with proper fallback
+  const getUserName = () => {
+    if (userLoading) return 'Loading...';
+    if (userError) return 'Error memuat nama';
+    if (userData?.user?.nama) return userData.user.nama;
+    if (userData?.nama) return userData.nama;
+    return 'Nama tidak tersedia';
+  };
 
   return (
     <ReceiptRedeemQrPage title="Sesi Selesai">
@@ -67,21 +77,16 @@ export default function Page() {
         </div>
       )}
 
-      {/* Success Message */}
-      {claimResult && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-center justify-center mb-2">
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">✓</span>
-            </div>
-          </div>
-          <p className="text-center text-green-800 font-medium text-sm">
-            Klaim berhasil diproses!
-          </p>
+      {userError && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+          <strong className="font-bold">User Data Warning: </strong>
+          <span className="block sm:inline">
+            Tidak dapat memuat data pengguna
+          </span>
         </div>
       )}
 
-      <h2 className="text-[18px] font-semibold mt-6 mb-2 text-center">
+      <h2 className="text-[18px] font-semibold mt-6 mb-2 text-center text-text-primary">
         {claimResult ? 'Klaim Botol Berhasil!' : 'Anda Meninggalkan RVM Lokasi'}
       </h2>
       <p className="text-sm text-regular text-gray-600 mb-6 text-center">
@@ -128,9 +133,7 @@ export default function Page() {
         <div className="border shadow-sm p-3 rounded-lg">
           <p className="font-semibold text-gray-500 text-sm">Nama Pengguna</p>
           <p className="font-semibold text-[#121212] text-sm">
-            {userLoading
-              ? 'Loading...'
-              : userData?.user?.nama || userData?.nama || 'Guest User'}
+            {getUserName()}
           </p>
         </div>
 
@@ -141,22 +144,6 @@ export default function Page() {
           </p>
         </div>
       </div>
-
-      {/* Summary */}
-      <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-        <div className="text-center">
-          <h3 className="font-semibold text-green-800 mb-2">Sesi Berhasil!</h3>
-          <p className="text-sm text-green-600">
-            Anda telah mengumpulkan {loading ? '...' : sessionBottles} botol dan
-            mendapatkan {loading ? '...' : sessionPoints} poin
-          </p>
-          <p className="text-xs text-green-500 mt-1">
-            Total poin Anda sekarang:{' '}
-            {loading ? '...' : (points + sessionPoints).toLocaleString()}
-          </p>
-        </div>
-      </div>
-
     </ReceiptRedeemQrPage>
   );
 }

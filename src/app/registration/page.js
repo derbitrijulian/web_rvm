@@ -149,7 +149,7 @@ export default function Page() {
             />
           </div>
 
-          <p className="text-xs pt-2">*Tanda Kolom Wajib Diisi</p>
+          <p className="text-xs pt-2 text-red-500">*Tanda Kolom Wajib Diisi</p>
           <div className="flex items-start gap-5 px-6 mt-3">
             <label className="flex items-center cursor-pointer">
               <input
@@ -158,7 +158,7 @@ export default function Page() {
                 onChange={() => setChecked(!checked)}
                 className="peer h- w-5 cursor-pointer rounded border border-gray-300 checked:bg-primary"
               />
-              <span className="ml-2 text-xs">
+              <span className="ml-2 text-xs text-text-primary">
                 Saya menyetujui <Link href="/syarat-ketentuan?callback=/registration">Syarat dan Ketentuan</Link>
               </span>
             </label>
