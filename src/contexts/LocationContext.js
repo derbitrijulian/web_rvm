@@ -14,12 +14,15 @@ export const useLocation = () => {
 export const LocationProvider = ({ children }) => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [permitLocationAccess, setPermitLocationAccess] = useState(false);
 
   const value = {
     selectedLocation,
     setSelectedLocation,
     currentLocation,
     setCurrentLocation,
+    permitLocationAccess,
+    setPermitLocationAccess,
   };
 
   return (

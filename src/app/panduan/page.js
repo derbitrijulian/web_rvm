@@ -55,7 +55,7 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="bg-primary h-full pt-[35px]">
+    <div className="bg-primary h-full pt-[35px] flex flex-col">
       <div className="flex items-center justify-center">
         <Link href="qr" className="absolute left-6 top-[44px]">
           <Image src="/svg/image-back.svg" alt="Back" width={14} height={25} />
@@ -69,7 +69,7 @@ export default function Page() {
         Penukaran sampah botol plastik di Reverse Vending Machine
       </p>
 
-      <div className="bg-bgSecondary h-full rounded-t-[36px] mt-7 pt-10 px-9 pb-8">
+      <div className="bg-bgSecondary rounded-t-[36px] mt-7 pt-10 px-9 pb-8 flex-1">
         <div className="flex justify-center -translate-y-14 items-center relative rounded-xl">
           <div className=" bg-white shadow-xl relative rounded-xl">
             <video

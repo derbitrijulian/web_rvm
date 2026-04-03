@@ -59,7 +59,7 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="bg-primary h-full pt-[35px]">
+    <div className="bg-primary h-full pt-[35px] flex flex-col">
       {/* Header */}
       <div className="justify-center">
         <h1 className="text-bgSecondary font-semibold w-full text-center text-[24px] pb-6 pt-1">
@@ -68,7 +68,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Section */}
-      <div className="bg-bgSecondary h-full rounded-t-[36px] pt-10 px-9 pb-8 mt-20 relative">
+      <div className="bg-bgSecondary rounded-t-[36px] pt-10 px-9 pb-8 mt-20 relative flex-1">
         {isLoading ? (
           // Loading State
           <div className="flex flex-col items-center">

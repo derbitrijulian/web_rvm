@@ -10,7 +10,7 @@ export default function Page() {
   const callbackUrl = searchParams.get('callback') || '/profil';
 
   return (
-    <div className="bg-primary h-screen pt-[35px] ">
+    <div className="bg-primary h-screen pt-[35px] flex flex-col">
       <div className="flex items-center justify-center">
         <Link href={callbackUrl} className="absolute left-6 top-[44px]">
           <Image src="/svg/image-back.svg" alt="Back" width={14} height={25} />
@@ -21,7 +21,7 @@ export default function Page() {
         </h1>
       </div>
 
-      <div className="bg-bgSecondary h-full rounded-t-[36px] pt-10 px-9 pb-8">
+      <div className="bg-bgSecondary rounded-t-[36px] pt-10 px-9 pb-8 flex-1">
         <p className="text-text-primary font-normal px-1 pt-6 pb-8">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
           eiusmod tempor incididunt ut labore et dolore magna aliqua. Nisl

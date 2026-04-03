@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function RedeemGopayPage() {
   return (
-    <div className="bg-primary pt-[35px]">
+    <div className="bg-primary pt-[35px] min-h-screen flex flex-col">
       {/* Header Section */}
       <div className="flex justify-between items-center px-5">
         <div className="flex items-center gap-2">
@@ -35,7 +35,7 @@ export default function RedeemGopayPage() {
       </h1>
 
       {/* Content Section */}
-      <div className="bg-bgSecondary h-full rounded-t-[36px] pt-10 my-10">
+      <div className="bg-bgSecondary rounded-t-[36px] pt-10 my-10 flex-1">
         {/* Nomor Rekening */}
         <div className="grid gap-4 px-5 py-5">
           <div className="px-5">

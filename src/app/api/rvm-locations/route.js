@@ -36,15 +36,50 @@ export async function GET(req) {
 
     const totalPage = Math.ceil(totalData / limit);
 
-    return NextResponse.json({
-      success: true,
-      code: 200,
-      message: 'Success fetching RVM locations',
-      data: locations.map((loc) => ({
+    // Validate and transform location data
+    const validatedLocations = locations.map((loc) => {
+      // Validate position
+      const position = loc.position;
+      let validPosition = position;
+
+      if (position && typeof position === 'object') {
+        const lat = position.latitude;
+        const lng = position.longitude;
+
+        // Log position data for debugging
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`📍 Location ${loc.id} (${loc.name}):`, {
+            lat,
+            lng,
+            type: typeof position,
+            isObject: true,
+          });
+        }
+
+        // Validate coordinates
+        if (
+          typeof lat === 'number' &&
+          typeof lng === 'number' &&
+          !isNaN(lat) &&
+          !isNaN(lng)
+        ) {
+          if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            validPosition = position;
+          } else {
+            console.error(`❌ Invalid coordinate range for ${loc.name}:`, {
+              lat,
+              lng,
+            });
+            validPosition = { latitude: 0, longitude: 0 }; // Fallback
+          }
+        }
+      }
+
+      return {
         id: loc.id,
         name: loc.name,
         address: loc.address,
-        position: loc.position,
+        position: validPosition,
         capacity: loc.capacity,
         currentStock: loc.currentStock,
         capacityStatus: loc.capacityStatus,
@@ -53,7 +88,14 @@ export async function GET(req) {
         status: loc.status,
         created_at: loc.createdAt,
         updated_at: loc.updatedAt,
-      })),
+      };
+    });
+
+    return NextResponse.json({
+      success: true,
+      code: 200,
+      message: 'Success fetching RVM locations',
+      data: validatedLocations,
       pagination: {
         total_data: totalData,
         page,

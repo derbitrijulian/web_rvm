@@ -25,13 +25,34 @@ export const UserProvider = ({ children }) => {
       const userData = await fetchUser();
 
       if (userData.code === 200) {
+        console.log('✅ User data loaded:', userData.data?.email || 'unknown');
         setUserDetail(userData.data);
       } else {
         throw new Error(userData.message || 'Failed to load user data');
       }
     } catch (error) {
-      console.error('Error loading user:', error);
-      setError(error.message);
+      // Check if error is auth-related (401/403)
+      if (
+        error.message?.includes('401') ||
+        error.message?.includes('403') ||
+        error.message?.includes('Token tidak')
+      ) {
+        console.warn('⚠️ User not authenticated or token expired');
+        // This is expected - user just isn't logged in yet
+        setError(null);
+        setUserDetail(null);
+      } else if (
+        error.message?.includes('404') ||
+        error.message?.includes('tidak ditemukan')
+      ) {
+        console.warn('⚠️ User profile not found');
+        setError(null);
+        setUserDetail(null);
+      } else {
+        // Real server error
+        console.error('❌ Error loading user:', error.message);
+        setError(error.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -45,13 +66,36 @@ export const UserProvider = ({ children }) => {
       const userData = await fetchUserWithBottleCount(userId);
 
       if (userData.code === 200) {
+        console.log(
+          '✅ User data with bottles loaded:',
+          userData.data?.email || 'unknown'
+        );
         setUserDetail(userData.data);
       } else {
         throw new Error(userData.message || 'Failed to load user data');
       }
     } catch (error) {
-      console.error('Error loading user with bottles:', error);
-      setError(error.message);
+      // Check if error is auth-related (401/403)
+      if (
+        error.message?.includes('401') ||
+        error.message?.includes('403') ||
+        error.message?.includes('Token tidak')
+      ) {
+        console.warn('⚠️ User not authenticated or token expired');
+        setError(null);
+        setUserDetail(null);
+      } else if (
+        error.message?.includes('404') ||
+        error.message?.includes('tidak ditemukan')
+      ) {
+        console.warn('⚠️ User profile not found');
+        setError(null);
+        setUserDetail(null);
+      } else {
+        // Real server error
+        console.error('❌ Error loading user with bottles:', error.message);
+        setError(error.message);
+      }
     } finally {
       setIsLoading(false);
     }

@@ -11,7 +11,8 @@ import { useLocation } from '../../contexts/LocationContext';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { selectedLocation, currentLocation } = useLocation();
+  const { selectedLocation, currentLocation, permitLocationAccess } =
+    useLocation();
 
   const isActive = (path) => pathname === path;
 
@@ -58,25 +59,44 @@ export default function Navbar() {
 
         {pathname === '/lokasi' ? (
           <li
-            onClick={selectedLocation ? openGoogleMaps : null}
+            onClick={
+              selectedLocation && permitLocationAccess ? openGoogleMaps : null
+            }
             className={`flex flex-col items-center cursor-pointer transform ${
-              selectedLocation ? 'text-black' : 'opacity-50 cursor-not-allowed'
+              selectedLocation && permitLocationAccess
+                ? 'text-black'
+                : 'opacity-50 cursor-not-allowed'
             }`}
           >
             <div className="relative flex justify-center -translate-y-10">
-              {selectedLocation ? (
+              {selectedLocation && permitLocationAccess ? (
                 <>
                   <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></div>
-                  <div className=" relative inline-flex rounded-full w-20 h-20 bg-sky-500   items-center justify-center ">
-                    <BiNavigation className="text-white w-10 h-10 text-center  " />
+                  <div className="relative inline-flex rounded-full w-20 h-20 bg-sky-500 items-center justify-center">
+                    <Image
+                      src="/svg/nav.svg"
+                      alt="navigasi putih"
+                      width={40}
+                      height={40}
+                    />
                   </div>
+                  <p className="text-black font-semibold text-center text-xs">
+                    Navigasi
+                  </p>
                 </>
               ) : (
-                <div className="grid items-center">
-                  <div className=" relative inline-flex rounded-full w-20 h-20 bg-primary  items-center justify-center ">
-                    <BiNavigation className="text-white w-10 h-10 text-center  " />
+                <div className="grid items-center gap-1">
+                  <div className="relative inline-flex rounded-full w-20 h-20 bg-gray-300 items-center justify-center">
+                    <Image
+                      src="/svg/nav_hitam.svg"
+                      alt="navigasi hitam"
+                      width={40}
+                      height={40}
+                    />
                   </div>
-                  <p className="text-black font-semibold">Navigasi</p>
+                  <p className="text-black font-semibold text-center text-xs">
+                    Navigasi
+                  </p>
                 </div>
               )}
             </div>

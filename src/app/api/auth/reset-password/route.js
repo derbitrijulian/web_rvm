@@ -1,6 +1,5 @@
 import prisma from '../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
@@ -28,52 +27,48 @@ export async function POST(req) {
       );
     }
 
-    // Verify reset token
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      if (decoded.type !== 'password_reset') {
-        throw new Error('Invalid token type');
-      }
-    } catch (error) {
-      return NextResponse.json(
-        { message: 'Token tidak valid atau sudah kadaluarsa' },
-        { status: 400 }
-      );
-    }
-
-    // Check if user still exists
+    // Cari user berdasarkan reset token
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { resetPasswordToken: token },
     });
 
     if (!user) {
       return NextResponse.json(
-        { message: 'User tidak ditemukan' },
-        { status: 404 }
+        { message: 'Token reset password tidak valid' },
+        { status: 400 }
+      );
+    }
+
+    // Cek apakah token sudah expired
+    if (user.resetPasswordTokenExpiry < new Date()) {
+      return NextResponse.json(
+        { message: 'Token reset password sudah expired. Silakan request reset password lagi.' },
+        { status: 400 }
       );
     }
 
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password
+    // Update password dan clear reset token
     await prisma.user.update({
-      where: { id: decoded.userId },
+      where: { id: user.id },
       data: {
         password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordTokenExpiry: null,
         updatedAt: new Date(),
       },
     });
 
     return NextResponse.json(
-      { message: 'Password berhasil diperbarui' },
+      { message: 'Password berhasil diperbarui. Silakan login dengan password baru Anda.' },
       { status: 200 }
     );
   } catch (error) {
+    console.error('Reset password error:', error);
     return NextResponse.json(
-      { message: 'Terjadi kesalahan server' },
+      { message: error.message || 'Terjadi kesalahan server' },
       { status: 500 }
     );
   }

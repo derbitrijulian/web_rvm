@@ -138,7 +138,7 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="bg-primary pt-[35px] min-h-screen">
+    <div className="bg-primary pt-[35px] min-h-screen flex flex-col">
       {/* Header */}
       <div className="justify-center">
         <Link href="/profil" className="absolute left-6 top-[44px]">
@@ -150,7 +150,7 @@ export default function EditProfilePage() {
       </div>
 
       {/* Profile Section */}
-      <div className="bg-bgSecondary h-full rounded-t-[36px] py-10 px-9 mt-20 relative">
+      <div className="bg-bgSecondary rounded-t-[36px] py-10 px-9 mt-20 relative flex-1">
         <form onSubmit={handleSubmit} className="flex flex-col items-center">
           {/* Avatar */}
           <div className="absolute -top-16 w-[130px] h-[130px] rounded-full bg-text-primary flex items-center justify-center">

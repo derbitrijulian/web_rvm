@@ -4,18 +4,30 @@ import { NextResponse } from 'next/server';
 
 // Helper function untuk verifikasi token
 function verifyToken(token) {
+  if (!token) {
+    return null;
+  }
+
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ JWT_SECRET tidak dikonfigurasi di environment variables');
+    return null;
+  }
+
   try {
     return jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
+    console.warn('⚠️ Token verification failed:', error.message);
     return null;
   }
 }
 
 export async function GET(req) {
   try {
+    console.log('📍 Profile API GET called');
     const token = req.cookies.get('token')?.value;
 
     if (!token) {
+      console.log('⚠️ No token found in cookies');
       return NextResponse.json(
         {
           success: false,
@@ -25,8 +37,10 @@ export async function GET(req) {
       );
     }
 
+    console.log('🔐 Token found, verifying...');
     const decoded = verifyToken(token);
     if (!decoded) {
+      console.log('⚠️ Token verification failed');
       return NextResponse.json(
         {
           success: false,
@@ -35,6 +49,8 @@ export async function GET(req) {
         { status: 401 }
       );
     }
+
+    console.log('📧 Token verified for user:', decoded.userId);
 
     // Ambil data user dari database
     const user = await prisma.user.findUnique({
@@ -45,6 +61,7 @@ export async function GET(req) {
     });
 
     if (!user) {
+      console.log('⚠️ User not found:', decoded.userId);
       return NextResponse.json(
         {
           success: false,
@@ -53,6 +70,8 @@ export async function GET(req) {
         { status: 404 }
       );
     }
+
+    console.log('✅ User found:', user.email);
 
     // Hapus password dari response untuk keamanan
     const { password, ...userWithoutPassword } = user;
@@ -75,7 +94,13 @@ export async function GET(req) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Profile GET Error:', error);
+    console.error('❌ Profile GET Error:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    });
     return NextResponse.json(
       {
         success: false,
@@ -162,7 +187,13 @@ export async function PUT(req) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Update Profile Error:', error);
+    console.error('❌ Update Profile Error:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    });
     return NextResponse.json(
       {
         success: false,

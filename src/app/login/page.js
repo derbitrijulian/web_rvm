@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { loginUser } from '../../services/auth-service';
 
 export default function Page() {
@@ -12,6 +13,7 @@ export default function Page() {
   });
 
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -42,7 +44,7 @@ export default function Page() {
   };
 
   return (
-    <div className="bg-primary h-screen pt-[35px]">
+    <div className="bg-primary h-screen pt-[35px] flex flex-col">
       <div className="flex items-center justify-center">
         <Link href="/onboarding" className="absolute left-8 top-[44px]">
           <Image src="/svg/image-back.svg" alt="Back" width={14} height={25} />
@@ -57,7 +59,7 @@ export default function Page() {
         Silahkan masuk atau daftar jika belum mempunyai akun.
       </p>
 
-      <div className="bg-bgSecondary h-screen rounded-t-[36px] pt-20 px-9">
+      <div className="bg-bgSecondary rounded-t-[36px] pt-20 px-9 flex-1">
         <form onSubmit={handleSubmit}>
           <div>
             <label className="text-text-primary text-sm font-medium text-[15px]">
@@ -83,14 +85,23 @@ export default function Page() {
               </Link>
             </label>
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Masukkan Kata Sandi"
-              value={formData.password}
-              onChange={handleChange}
-              className="text-text-primary mt-2 pl-3 pr-3 w-full p-3 border-[3px] border-secondary rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
+            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="Masukkan Kata Sandi"
+                value={formData.password}
+                onChange={handleChange}
+                className="text-text-primary pl-3 py-3 w-full text-sm focus:outline-none bg-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="pr-3 text-text-primary hover:text-primary transition-colors flex-shrink-0"
+              >
+                {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
+              </button>
+            </div>
           </div>
 
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}

@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { registerUser } from '../../services/auth-service';
 
 export default function Page() {
@@ -16,6 +17,8 @@ export default function Page() {
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +63,7 @@ export default function Page() {
   };
 
   return (
-    <div className="bg-primary pt-[34px]">
+    <div className="bg-primary pt-[34px] min-h-screen flex flex-col">
       <div className="flex items-center justify-center">
         <Link href="/login" className="absolute left-8 top-[44px]">
           <Image src="/svg/image-back.svg" alt="Back" width={14} height={25} />
@@ -73,7 +76,7 @@ export default function Page() {
         Silahkan isi form untuk bergabung
       </p>
       <form onSubmit={handleSubmit}>
-        <div className="bg-bgSecondary h-full rounded-t-[36px] pt-20 px-9">
+        <div className="bg-bgSecondary rounded-t-[36px] pt-20 px-9 flex-1">
           <div>
             <label
               className="text-text-primary text-sm font-medium"
@@ -110,29 +113,51 @@ export default function Page() {
             <label className="text-text-primary text-sm font-medium">
               Kata Sandi
             </label>
-            <input
-              required
-              type="password"
-              name="password"
-              placeholder="Masukkan Kata Sandi"
-              value={formData.password}
-              onChange={handleChange}
-              className="text-text-primary mt-2 pl-3 pr-3 w-full p-3 border-[3px] border-secondary rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary">
+              <input
+                required
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="Masukkan Kata Sandi"
+                value={formData.password}
+                onChange={handleChange}
+                className="text-text-primary pl-3 py-3 w-full text-sm focus:outline-none bg-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="pr-3 text-text-primary hover:text-primary transition-colors flex-shrink-0"
+              >
+                {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
+              </button>
+            </div>
           </div>
           <div className="mt-3">
             <label className="text-text-primary text-sm font-medium">
               Konfirmasi Kata Sandi
             </label>
-            <input
-              required
-              type="password"
-              name="confirmPassword"
-              placeholder="Konfirmasi Kata Sandi"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="text-text-primary mt-2 pl-3 pr-3 w-full p-3 border-[3px] border-secondary rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary">
+              <input
+                required
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                placeholder="Konfirmasi Kata Sandi"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="text-text-primary pl-3 py-3 w-full text-sm focus:outline-none bg-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="pr-3 text-text-primary hover:text-primary transition-colors flex-shrink-0"
+              >
+                {showConfirmPassword ? (
+                  <FiEye size={20} />
+                ) : (
+                  <FiEyeOff size={20} />
+                )}
+              </button>
+            </div>
           </div>
           <div className="mt-3">
             <label className="text-text-primary text-sm font-medium">
@@ -159,7 +184,10 @@ export default function Page() {
                 className="peer h- w-5 cursor-pointer rounded border border-gray-300 checked:bg-primary"
               />
               <span className="ml-2 text-xs text-text-primary">
-                Saya menyetujui <Link href="/syarat-ketentuan?callback=/registration">Syarat dan Ketentuan</Link>
+                Saya menyetujui{' '}
+                <Link href="/syarat-ketentuan?callback=/registration">
+                  Syarat dan Ketentuan
+                </Link>
               </span>
             </label>
           </div>
@@ -175,7 +203,6 @@ export default function Page() {
           {success && <p className="text-green-500 text-sm">{success}</p>}
         </div>
       </form>
-
     </div>
   );
 }

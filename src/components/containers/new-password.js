@@ -74,9 +74,9 @@ export default function NewPassword() {
   };
 
   return (
-    <div className="bg-primary h-screen pt-[35px]">
+    <div className="bg-primary h-full pt-[35px]">
       <div className="flex items-center justify-center">
-        <Link href="/login" className="absolute left-8 top-[44px]">
+        <Link href="/profil" className="absolute left-8 top-[44px]">
           <Image src="/svg/image-back.svg" alt="Back" width={14} height={25} />
         </Link>
 
@@ -85,7 +85,7 @@ export default function NewPassword() {
         </h1>
       </div>
 
-      <div className="bg-bgSecondary h-[559px] rounded-t-[36px] pt-20 px-9">
+      <div className="bg-bgSecondary h-screen rounded-t-[36px] pt-20 px-9">
         <div>
           <label className="text-text-primary text-sm font-medium text-[15px]">
             Kata Sandi

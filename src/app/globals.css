@@ -39,3 +39,40 @@ body {
 .animate-scale-in {
   animation: scale-in 0.2s ease-out;
 }
+
+/* 🔥 FIX LEAFLET OVERLAY */
+.leaflet-container {
+  z-index: 0 !important;
+}
+
+.leaflet-pane {
+  z-index: 0 !important;
+}
+
+/* 🔥 HIDE LEAFLET ROUTING INSTRUCTIONS */
+.leaflet-routing-container {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.leaflet-routing-alt {
+  display: none !important;
+}
+
+.leaflet-routing-error {
+  display: none !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 10 !important;
+}
+
+.leaflet-control-container {
+  z-index: 10 !important;
+}
+
+/* 🔥 HIDE DEFAULT LEAFLET ZOOM CONTROL - using custom buttons instead */
+.leaflet-control-zoom {
+  display: none !important;
+}

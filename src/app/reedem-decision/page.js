@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function RedeemDecisionPage() {
   return (
-    <div className="bg-primary h-full pt-[35px]">
+    <div className="bg-primary h-full pt-[35px] flex flex-col">
       {/* Header Section */}
       <div className="flex justify-between items-center px-5">
         <div className="flex items-center gap-2">
@@ -38,7 +38,7 @@ export default function RedeemDecisionPage() {
       </p>
 
       {/* Content Section */}
-      <div className="bg-bgSecondary h-full rounded-t-[36px] pt-10 mt-10 pb-20">
+      <div className="bg-bgSecondary rounded-t-[36px] pt-10 mt-10 pb-20 flex-1">
         {/* Bank */}
         <div className="grid gap-4 px-5 py-5">
           <h1 className="text-center text-2xl text-text-primary font-medium">

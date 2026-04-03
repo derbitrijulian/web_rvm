@@ -170,7 +170,7 @@ export default function RedeemGopayPage() {
       </p>
 
       {/* Content Section */}
-      <div className="bg-bgSecondary h-full rounded-t-[36px] p-5">
+      <div className="bg-bgSecondary rounded-t-[36px] p-5 flex-1">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             <strong className="font-bold">Error: </strong>
@@ -231,7 +231,6 @@ export default function RedeemGopayPage() {
               <div className="absolute inset-0 bg-green-100 opacity-20 animate-ping rounded-2xl"></div>
             )}
           </div>
-
         </div>
 
         {/* Claim Bottles */}
@@ -248,10 +247,10 @@ export default function RedeemGopayPage() {
             {claiming
               ? '⏳ Memproses Klaim...'
               : loading
-              ? '⏳ Loading...'
-              : bottleCount > 0
-              ? `Klaim ${bottleCount} Botol`
-              : 'Belum Ada Deteksi'}
+                ? '⏳ Loading...'
+                : bottleCount > 0
+                  ? `Klaim ${bottleCount} Botol`
+                  : 'Belum Ada Deteksi'}
           </button>
         </div>
 

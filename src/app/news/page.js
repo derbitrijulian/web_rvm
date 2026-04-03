@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function Page() {
   return (
-    <div className="bg-primary pt-[35px]">
+    <div className="bg-primary pt-[35px] min-h-screen flex flex-col">
       <div className="absolute ">
         <div className="flex items-center justify-between px-6">
           {/* Back Button */}
@@ -24,7 +24,7 @@ export default function Page() {
           </h1>
         </div>
       </div>
-      <div className="bg-bgSecondary h-screen rounded-t-[36px] pt-10 mt-16">
+      <div className="bg-bgSecondary rounded-t-[36px] pt-10 mt-16 flex-1">
         <div className="grid gap-8 px-5">
           {/* image 1 */}
           <div className="flex gap-8">
