@@ -216,8 +216,8 @@ export default function Map({ searchQuery = '' }) {
         (error) => reject(error),
         {
           enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
+          timeout: 5000,
+          maximumAge: 60000, // Allow cache for 60 seconds
         }
       );
     });
@@ -267,6 +267,19 @@ export default function Map({ searchQuery = '' }) {
       return () => navigator.geolocation.clearWatch(watchId);
     } catch (error) {
       console.error('❌ Error getting location:', error);
+      // Use fallback location from context if available
+      if (contextCurrentLocation) {
+        console.log(
+          '📍 Using fallback location from context:',
+          contextCurrentLocation
+        );
+        setCurrentLocation(contextCurrentLocation);
+        return;
+      }
+      // Use default Jakarta location
+      console.log('🏙️ Using default location: Jakarta');
+      setCurrentLocation([-6.2088, 106.8456]);
+      setContextCurrentLocation([-6.2088, 106.8456]);
       setLocationError(
         'Location permission denied. Showing RVM locations without your location.'
       );

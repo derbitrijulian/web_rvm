@@ -62,17 +62,19 @@ export default function Navbar() {
             onClick={
               selectedLocation && permitLocationAccess ? openGoogleMaps : null
             }
-            className={`flex flex-col items-center cursor-pointer transform ${
+            className={`flex flex-col items-center -translate-y-9 ${
               selectedLocation && permitLocationAccess
-                ? 'text-black'
-                : 'opacity-50 cursor-not-allowed'
+                ? 'cursor-pointer'
+                : ' cursor-not-allowed'
             }`}
           >
-            <div className="relative flex justify-center -translate-y-10">
-              {selectedLocation && permitLocationAccess ? (
-                <>
-                  <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></div>
-                  <div className="relative inline-flex rounded-full w-20 h-20 bg-sky-500 items-center justify-center">
+            {permitLocationAccess ? (
+              <>
+                <div className="relative inline-flex">
+                  {selectedLocation && (
+                    <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary"></div>
+                  )}
+                  <div className="relative rounded-full p-6 bg-primary mb-2">
                     <Image
                       src="/svg/nav.svg"
                       alt="navigasi putih"
@@ -80,26 +82,24 @@ export default function Navbar() {
                       height={40}
                     />
                   </div>
-                  <p className="text-black font-semibold text-center text-xs">
-                    Navigasi
-                  </p>
-                </>
-              ) : (
-                <div className="grid items-center gap-1">
-                  <div className="relative inline-flex rounded-full w-20 h-20 bg-gray-300 items-center justify-center">
-                    <Image
-                      src="/svg/nav_hitam.svg"
-                      alt="navigasi hitam"
-                      width={40}
-                      height={40}
-                    />
-                  </div>
-                  <p className="text-black font-semibold text-center text-xs">
-                    Navigasi
-                  </p>
                 </div>
-              )}
-            </div>
+                <span className="text-xs font-medium text-black">Navigasi</span>
+              </>
+            ) : (
+              <>
+                <div className="rounded-full p-6 bg-gray-300 mb-2">
+                  <Image
+                    src="/svg/nav_hitam.svg"
+                    alt="navigasi hitam"
+                    width={40}
+                    height={40}
+                  />
+                </div>
+                <span className="text-xs font-medium text-gray-500">
+                  Navigasi
+                </span>
+              </>
+            )}
           </li>
         ) : (
           <Link href="/qr">

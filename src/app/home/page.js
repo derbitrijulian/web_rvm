@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useFetch } from '@/hooks/use-fetch';
 import dynamic from 'next/dynamic';
+import { useLocation } from '@/contexts/LocationContext';
 
 // Import Leaflet secara dinamik untuk menghindari SSR issues
 const DynamicMap = dynamic(() => import('../../components/LeafletMap'), {
@@ -16,7 +17,7 @@ const DynamicMap = dynamic(() => import('../../components/LeafletMap'), {
 });
 
 export default function Page() {
-  const [currentLocation, setCurrentLocation] = useState(null);
+  const { currentLocation, setCurrentLocation } = useLocation();
   const [locationPermission, setLocationPermission] = useState('pending'); // 'granted', 'denied', 'pending'
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
 
@@ -50,7 +51,7 @@ export default function Page() {
       const position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
-          timeout: 15000,
+          timeout: 5000, // Reduced from 15000ms
           maximumAge: 60000, // 1 minute cache
         });
       });
@@ -69,7 +70,7 @@ export default function Page() {
       } else if (error.code === 2) {
         console.log('Location unavailable');
       } else if (error.code === 3) {
-        console.log('Location request timeout');
+        console.log('Location request timeout - using fallback');
       }
 
       setDefaultLocation();
@@ -325,7 +326,6 @@ export default function Page() {
             <h1 className="text-lg font-bold text-text-primary">
               Lokasi Terdekat
             </h1>
-           
           </div>
 
           <div className="flex gap-4 overflow-x-auto mt-3 scrollbar-hide">
@@ -349,8 +349,8 @@ export default function Page() {
                             rvm.capacityStatus === 'FULL'
                               ? '/svg/image-battery-red.svg'
                               : rvm.capacityStatus === 'ALMOST_FULL'
-                              ? '/svg/image-battery-yellow.svg'
-                              : '/svg/image-battery-green.svg'
+                                ? '/svg/image-battery-yellow.svg'
+                                : '/svg/image-battery-green.svg'
                           }
                           alt="battery-status"
                           width={20}
@@ -406,7 +406,6 @@ export default function Page() {
               </div>
             )}
           </div>
-
         </div>
 
         {/* News Section */}
