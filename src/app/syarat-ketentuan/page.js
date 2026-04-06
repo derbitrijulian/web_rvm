@@ -3,8 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import React from 'react';
 
-export default function Page() {
+function TermsContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callback') || '/';
 
@@ -41,5 +42,13 @@ export default function Page() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <TermsContent />
+    </React.Suspense>
   );
 }

@@ -2,8 +2,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import React from 'react';
 
-export default function Page() {
+function PrivacyContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callback') || '/profil';
 
@@ -40,5 +41,13 @@ export default function Page() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <PrivacyContent />
+    </React.Suspense>
   );
 }
