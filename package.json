@@ -23,7 +23,7 @@
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "leaflet-routing-machine": "^3.2.12",
-    "next": "^15.1.0",
+    "next": "^15.3.0",
     "node-fetch": "^3.3.2",
     "nodemailer": "^8.0.4",
     "nookies": "^2.5.2",
