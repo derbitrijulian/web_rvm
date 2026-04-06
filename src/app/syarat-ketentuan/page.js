@@ -1,10 +1,10 @@
 'use client';
-'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import {  useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-export default function Page() {
+function TermsContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callback') || '/';
 
@@ -41,5 +41,13 @@ export default function Page() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TermsContent />
+    </Suspense>
   );
 }

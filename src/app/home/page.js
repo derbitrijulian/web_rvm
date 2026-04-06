@@ -38,6 +38,13 @@ export default function Page() {
 
   // Function to request current position
   const requestCurrentPosition = async () => {
+    // Guard against server-side rendering
+    if (typeof window === 'undefined') {
+      console.log('Running on server, skipping geolocation');
+      setDefaultLocation();
+      return;
+    }
+
     if (!('geolocation' in navigator)) {
       console.error('Geolocation is not supported by this browser.');
       setLocationPermission('denied');
