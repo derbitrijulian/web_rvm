@@ -44,6 +44,8 @@ export default function Map({ searchQuery = '' }) {
   const mapRef = useRef(null);
   const routeRef = useRef(null);
   const hasInitialZoomRef = useRef(false);
+  const lastLocationRef = useRef(null); // Track last location to apply threshold
+  const userInteractedRef = useRef(false); // Track if user interacted with map
   const [isLoading, setIsLoading] = useState(true);
   const [locationError, setLocationError] = useState(null);
 
@@ -232,6 +234,7 @@ export default function Map({ searchQuery = '' }) {
       const currentPos = [latitude, longitude];
       setCurrentLocation(currentPos);
       setContextCurrentLocation(currentPos); // Update context
+      lastLocationRef.current = currentPos; // Store as last location
 
       if (mapRef.current) {
         mapRef.current.setView([latitude, longitude], 14);
@@ -247,8 +250,31 @@ export default function Map({ searchQuery = '' }) {
         (position) => {
           const { latitude, longitude } = position.coords;
           const newPos = [latitude, longitude];
+
+          // Only update if significantly moved (> 10 meters)
+          if (lastLocationRef.current) {
+            const lastLatLng = L.latLng(
+              lastLocationRef.current[0],
+              lastLocationRef.current[1]
+            );
+            const newLatLng = L.latLng(latitude, longitude);
+            const distance = lastLatLng.distanceTo(newLatLng);
+
+            // Only update if moved more than 10 meters
+            if (distance < 10) {
+              console.log(
+                `📍 Distance moved: ${distance.toFixed(1)}m (threshold: 10m) - skipping update`
+              );
+              return;
+            }
+            console.log(
+              `📍 Distance moved: ${distance.toFixed(1)}m - updating location`
+            );
+          }
+
           setCurrentLocation(newPos);
           setContextCurrentLocation(newPos); // Update context
+          lastLocationRef.current = newPos; // Update last location
           getLocationName(latitude, longitude)
             .then(setLocationName)
             .catch(() => setLocationName('Location unavailable'));
@@ -260,7 +286,7 @@ export default function Map({ searchQuery = '' }) {
         {
           enableHighAccuracy: true,
           timeout: 5000,
-          maximumAge: 10000, // Cache for 10 seconds - more responsive
+          maximumAge: 5000, // Cache for 5 seconds
         }
       );
 
@@ -274,12 +300,14 @@ export default function Map({ searchQuery = '' }) {
           contextCurrentLocation
         );
         setCurrentLocation(contextCurrentLocation);
+        lastLocationRef.current = contextCurrentLocation;
         return;
       }
       // Use default Jakarta location
       console.log('🏙️ Using default location: Jakarta');
       setCurrentLocation([-6.2088, 106.8456]);
       setContextCurrentLocation([-6.2088, 106.8456]);
+      lastLocationRef.current = [-6.2088, 106.8456];
       setLocationError(
         'Location permission denied. Showing RVM locations without your location.'
       );
@@ -343,9 +371,14 @@ export default function Map({ searchQuery = '' }) {
     }
   }, [permitLocationAccess, mounted]);
 
-  // Effect to update map view when current location changes (only if not searching)
+  // Effect to update map view when current location changes (only if user hasn't interacted)
   useEffect(() => {
-    if (currentLocation && mapRef.current && !searchQuery) {
+    if (
+      currentLocation &&
+      mapRef.current &&
+      !searchQuery &&
+      !userInteractedRef.current
+    ) {
       console.log('📍 Panning map to current location:', currentLocation);
 
       // Validate current location
@@ -367,6 +400,7 @@ export default function Map({ searchQuery = '' }) {
 
   const handleMarkerClick = (rvm) => {
     console.log('📍 Marker clicked:', rvm.name, 'position:', rvm.position);
+    userInteractedRef.current = true; // Mark that user interacted with map
 
     if (!currentLocation) {
       setLocationError(
@@ -658,6 +692,20 @@ export default function Map({ searchQuery = '' }) {
           console.log('✅ mapRef.current is now:', !!mapRef.current);
           // Hide default zoom control - akan pakai custom buttons
           map.zoomControl.remove();
+
+          // Add event listeners to detect user interaction
+          map.on('dragstart', () => {
+            console.log('👆 User started dragging map');
+            userInteractedRef.current = true;
+          });
+          map.on('wheel', () => {
+            console.log('🔄 User scrolled map');
+            userInteractedRef.current = true;
+          });
+          map.on('touchmove', () => {
+            console.log('📱 User touched map');
+            userInteractedRef.current = true;
+          });
         }}
       >
         <TileLayer
