@@ -26,6 +26,7 @@ export const getRvmLocations = async () => {
         },
         capacity: location.capacity,
         capacityStatus: location.capacityStatus,
+        image: location.image,
         created_at: location.created_at,
         updated_at: location.updated_at,
       }));

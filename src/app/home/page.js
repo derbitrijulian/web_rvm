@@ -337,70 +337,109 @@ export default function Page() {
 
           <div className="flex gap-4 overflow-x-auto mt-3 scrollbar-hide">
             {sortedLocations.length > 0 ? (
-              sortedLocations.map((rvm) => (
-                <div
-                  key={rvm.id}
-                  className="w-56 flex-shrink-0 bg-white rounded-[14px] p-4 flex flex-col drop-shadow-md"
-                >
-                  <div className="mt-2 text-text-primary flex-1 flex flex-col">
-                    <h3 className="text-sm font-semibold">{rvm.name}</h3>
-                    {rvm.address && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {rvm.address}
-                      </p>
-                    )}
-                    <div className="flex flex-col gap-3 mt-3 flex-grow">
-                      <div className="flex items-center gap-2">
-                        <Image
-                          src={
-                            rvm.capacityStatus === 'FULL'
-                              ? '/svg/image-battery-red.svg'
-                              : rvm.capacityStatus === 'ALMOST_FULL'
-                                ? '/svg/image-battery-yellow.svg'
-                                : '/svg/image-battery-green.svg'
-                          }
-                          alt="battery-status"
-                          width={20}
-                          height={20}
+              sortedLocations.map((rvm) => {
+                // Get status label and color
+                const getStatusInfo = (status) => {
+                  switch (status) {
+                    case 'FULL':
+                      return {
+                        label: 'Sudah Penuh',
+                        badge: 'bg-red-100 text-red-700',
+                        icon: '/svg/image-battery-red.svg',
+                      };
+                    case 'ALMOST_FULL':
+                      return {
+                        label: 'Hampir Penuh',
+                        badge: 'bg-yellow-100 text-yellow-700',
+                        icon: '/svg/image-battery-yellow.svg',
+                      };
+                    default:
+                      return {
+                        label: 'Belum Penuh',
+                        badge: 'bg-green-100 text-green-700',
+                        icon: '/svg/image-battery-green.svg',
+                      };
+                  }
+                };
+
+                const statusInfo = getStatusInfo(rvm.capacityStatus);
+
+                return (
+                  <div
+                    key={rvm.id}
+                    className="w-64 flex-shrink-0 bg-white rounded-[14px] overflow-hidden drop-shadow-md hover:drop-shadow-lg transition-shadow"
+                  >
+                    {/* Image Section */}
+                    <div className="relative h-40 bg-gray-200 overflow-hidden">
+                      {rvm.image && rvm.image.length > 0 ? (
+                        <img
+                          src={rvm.image}
+                          alt={rvm.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error(
+                              `Image failed to load for ${rvm.name}`
+                            );
+                            e.target.style.display = 'none';
+                          }}
                         />
-                        <p className="text-sm text-text-primary">
-                          {rvm.capacityStatus || 'AVAILABLE'}
-                        </p>
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center">
+                          <span className="text-gray-400 text-sm">
+                            Tidak ada foto
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="p-4 flex flex-col">
+                      <h3 className="text-sm font-semibold text-text-primary">
+                        {rvm.name}
+                      </h3>
+
+                      {/* Status Badge */}
+                      <div
+                        className={`inline-flex items-center gap-1.5 w-fit mt-2 px-3 py-1 rounded-full text-xs font-medium ${statusInfo.badge}`}
+                      >
+                        <Image
+                          src={statusInfo.icon}
+                          alt="status"
+                          width={14}
+                          height={14}
+                        />
+                        {statusInfo.label}
                       </div>
-                      <div className="flex justify-between mt-auto">
+
+                      {/* Distance and Button */}
+                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
                         <div className="flex items-center gap-2">
                           <Image
                             src="/svg/icon-lokasi.svg"
                             alt="location"
-                            width={20}
-                            height={20}
+                            width={16}
+                            height={16}
                           />
-                          <p className="text-sm text-text-primary">
+                          <p className="text-xs text-text-primary font-medium">
                             {rvm.distance === null
-                              ? 'Calculating...'
-                              : `${
-                                  rvm.distance >= 1000
-                                    ? (rvm.distance / 1000).toFixed(1)
-                                    : Math.round(rvm.distance)
-                                } ${rvm.distance >= 1000 ? 'km' : 'm'}`}
+                              ? 'Menghitung...'
+                              : `${rvm.distance >= 1000 ? (rvm.distance / 1000).toFixed(1) : Math.round(rvm.distance)} ${rvm.distance >= 1000 ? 'km' : 'm'}`}
                           </p>
                         </div>
-                        <div>
-                          <a
-                            href={`https://www.google.com/maps/dir/?api=1&destination=${rvm.lat},${rvm.lng}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <button className="px-6 py-2 bg-primary rounded-[8px] text-bgSecondary font-regular text-xs hover:bg-primary-dark">
-                              Rute
-                            </button>
-                          </a>
-                        </div>
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${rvm.lat},${rvm.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <button className="px-5 py-1.5 bg-primary rounded-[6px] text-white font-medium text-xs hover:bg-primary-dark transition">
+                            Rute
+                          </button>
+                        </a>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="w-full text-center text-gray-500 py-8">
                 <p className="text-lg mb-2">🗺️ Tidak ada lokasi RVM tersedia</p>
