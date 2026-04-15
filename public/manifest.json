@@ -34,17 +34,5 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["productivity", "utilities"],
-  "screenshots": [
-    {
-      "src": "/png/screenshot-540x720.png",
-      "sizes": "540x720",
-      "type": "image/png"
-    },
-    {
-      "src": "/png/screenshot-1080x1440.png",
-      "sizes": "1080x1440",
-      "type": "image/png"
-    }
-  ]
+  "categories": ["productivity", "utilities"]
 }

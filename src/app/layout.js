@@ -18,7 +18,8 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Web RVM',
+    title: 'RVM',
+    startupImage: '/png/LogoRVM-180.png',
   },
   formatDetection: {
     telephone: false,
@@ -31,7 +32,11 @@ export const metadata = {
   },
   icons: {
     icon: '/png/icon-192x192.png',
-    apple: '/png/icon-192x192.png',
+    apple: [
+      '/png/LogoRVM-180.png',
+      { url: '/png/icon-192x192.png', sizes: '192x192' },
+      { url: '/png/icon-512x512.png', sizes: '512x512' },
+    ],
   },
   themeColor: [{ media: '(prefers-color-scheme: light)', color: '#ffffff' }],
 };
