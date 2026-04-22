@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useFetch } from '@/hooks/use-fetch';
 import dynamic from 'next/dynamic';
 import { useLocation } from '@/contexts/LocationContext';
+import InstallButton from '@/components/InstallButton';
 
 // Import Leaflet secara dinamik untuk menghindari SSR issues
 const DynamicMap = dynamic(() => import('../../components/LeafletMap'), {
@@ -210,14 +211,17 @@ export default function Page() {
               </p>
             </div>
           </div>
-          <Link href="/notifikasi">
-            <Image
-              src="/svg/Notification.svg"
-              alt="notification"
-              width={30}
-              height={30}
-            />
-          </Link>
+          <div className="flex items-center gap-3">
+            <InstallButton />
+            <Link href="/notifikasi">
+              <Image
+                src="/svg/Notification.svg"
+                alt="notification"
+                width={30}
+                height={30}
+              />
+            </Link>
+          </div>
         </div>
 
         {/* Location Permission Notice */}
