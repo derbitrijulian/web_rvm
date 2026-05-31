@@ -12,11 +12,38 @@ model User {
   id          String           @id @default(uuid())
   email       String           @unique
   createdAt   DateTime         @default(now())
-  nama        String
-  password    String
-  phoneNumber String           @map("phone_number")
+  nama        String?
+  password    String?
+  phoneNumber String?          @map("phone_number")
   updatedAt   DateTime         @updatedAt
   bottleCount UserBottleCount?
+  
+  // Google OAuth fields
+  googleId    String?          @unique
+  isGoogleAuth Boolean         @default(false)
+}
+
+model Admin {
+  id          String      @id @default(uuid())
+  email       String      @unique
+  nama        String
+  password    String
+  role        AdminRole   @default(OPERATOR)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  lastLogin   DateTime?
+  
+  auditLogs   AuditLog[]
+  
+  @@map("admins")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  OPERATOR
+  CONTENT_MANAGER
 }
 
 model UserBottleCount {
@@ -77,6 +104,7 @@ model RvmLocation {
   contactNumber    String?
   status           String   @default("ACTIVE")
   image            String?
+  images           Json?    // JSON array of image objects: [{url, publicId}, ...]
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -89,14 +117,86 @@ enum BottleTransactionType {
 }
 
 model BottleCount {
-  id          Int      @id @default(autoincrement())
-  deviceId    String   // "ARDUINO_RVM_1"
-  count       Int      @default(1) // jumlah botol yang dideteksi
-  distance    Float?   // jarak sensor saat deteksi (opsional)
-  source      String   @default("arduino") // "arduino", "manual", "system"
-  timestamp   DateTime @default(now())
-   userBottleCountId  String?          
-  userBottleCount    UserBottleCount?    @relation(fields: [userBottleCountId], references: [id], onDelete: Cascade)
+  id               Int              @id @default(autoincrement())
+  deviceId         String
+  count            Int              @default(1)
+  distance         Float?
+  source           String           @default("arduino")
+  timestamp        DateTime         @default(now())
+  userBottleCountId String?
+  userBottleCount  UserBottleCount? @relation(fields: [userBottleCountId], references: [id], onDelete: Cascade)
   
   @@map("bottle_counts")
+}
+
+// ===== ADMIN AUDIT MODELS =====
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  adminId     String
+  action      String
+  targetType  String
+  targetId    String?
+  details     Json?
+  ipAddress   String?
+  timestamp   DateTime @default(now())
+  
+  admin       Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  
+  @@map("audit_logs")
+}
+
+model News {
+  id          String    @id @default(uuid())
+  title       String
+  content     String    @db.Text
+  imageUrl    String?
+  category    String
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@map("news")
+}
+
+model Voucher {
+  id            String              @id @default(uuid())
+  code          String              @unique
+  partner       String
+  value         Int
+  pointCost     Int
+  stock         Int                 @default(0)
+  isActive      Boolean             @default(true)
+  expiryDate    DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  
+  redemptions   VoucherRedemption[]
+  
+  @@map("vouchers")
+}
+
+model VoucherRedemption {
+  id          String   @id @default(uuid())
+  voucherId   String
+  userId      String
+  status      String
+  redeemedAt  DateTime @default(now())
+  usedAt      DateTime?
+  
+  voucher     Voucher  @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  
+  @@map("voucher_redemptions")
+}
+
+model SystemConfig {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+  
+  @@map("system_configs")
 }

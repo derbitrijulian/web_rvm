@@ -21,6 +21,7 @@ export async function GET(req) {
           id: true,
           name: true,
           address: true,
+          image: true,
           position: true,
           capacity: true,
           currentStock: true,
@@ -36,8 +37,32 @@ export async function GET(req) {
 
     const totalPage = Math.ceil(totalData / limit);
 
+    // Debug: Log locations data
+    if (process.env.NODE_ENV === 'development') {
+      console.log(
+        '📸 Locations from DB:',
+        locations.map((loc) => ({
+          id: loc.id,
+          name: loc.name,
+          image: loc.image,
+        }))
+      );
+    }
+
     // Validate and transform location data
     const validatedLocations = locations.map((loc) => {
+      // Parse image URL from JSON array if needed
+      let imageUrl = null;
+      if (loc.image) {
+        try {
+          const parsed = JSON.parse(loc.image);
+          imageUrl = Array.isArray(parsed) ? parsed[0] : parsed;
+        } catch (e) {
+          // If not JSON, use as is
+          imageUrl = loc.image;
+        }
+      }
+
       // Validate position
       const position = loc.position;
       let validPosition = position;
@@ -79,6 +104,7 @@ export async function GET(req) {
         id: loc.id,
         name: loc.name,
         address: loc.address,
+        image: imageUrl,
         position: validPosition,
         capacity: loc.capacity,
         currentStock: loc.currentStock,

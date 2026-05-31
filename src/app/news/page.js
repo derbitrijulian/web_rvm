@@ -1,7 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { getAllNews } from '@/services/news-service';
+import { getRelativeTime } from '@/utils/dateFormatter';
 
-export default function Page() {
+export default async function Page() {
+  const news = await getAllNews();
+
+  console.log('[NEWS PAGE] Rendered with', news?.length || 0, 'news items');
+
   return (
     <div className="bg-primary pt-[35px] min-h-screen flex flex-col">
       <div className="absolute ">
@@ -25,111 +31,46 @@ export default function Page() {
         </div>
       </div>
       <div className="bg-bgSecondary rounded-t-[36px] pt-10 mt-16 flex-1">
-        <div className="grid gap-8 px-5">
-          {/* image 1 */}
-          <div className="flex gap-8">
-            <Image
-              src="/png/image-news1.png"
-              width={112}
-              height={112}
-              alt="news 1"
-              className="rounded-[10px]"
-            />
-            <div>
-              <h1 className="text-lg font-semibold text-primary">Hari ini</h1>
-              <p className="text-sm font-medium text-text-primary py-2">
-                Sinar Mas resmikan reverse vending Machine Di Kalibata Plaza
-              </p>
-              <div className="flex justify-between">
-                <p className="text-[10px] font-medium text-primary">
-                  6 jam yang lalu
-                </p>
-                <Link href="/view-news">
-                  <p className="text-[10px] font-medium text-primary hover:underline">
-                    Selengkapnya
-                  </p>
-                </Link>
+        <div className="grid gap-8 px-5 pb-8">
+          {news && news.length > 0 ? (
+            news.map((item) => (
+              <div key={item.id} className="flex gap-8">
+                {item.imageUrl && (
+                  <Image
+                    src={item.imageUrl}
+                    width={112}
+                    height={112}
+                    alt={item.title}
+                    className="rounded-[10px] object-cover"
+                  />
+                )}
+                <div className="flex-1">
+                  <div className="flex flex-col justify-between h-full">
+                    <p className="text-sm font-medium text-text-primary">
+                      {item.title}
+                    </p>
+                    <div className="flex justify-between">
+                      <p className="text-[10px] font-medium text-primary">
+                        {getRelativeTime(item.publishedAt || item.createdAt)}
+                      </p>
+                      <Link href={`/view-news?id=${item.id}`}>
+                        <p className="text-[10px] font-medium text-primary hover:underline">
+                          Selengkapnya
+                        </p>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          {/* image 2 */}
-          <div className="flex gap-8">
-            <Image
-              src="/png/image-news2.png"
-              width={112}
-              height={112}
-              alt="news 2"
-              className="rounded-[10px]"
-            />
-            <div>
-              <h1 className="text-lg font-semibold text-primary">
-                2 hari yang lalu
-              </h1>
-              <p className="text-sm font-medium text-text-primary py-4">
-                ASDP tambah reverse vending machine
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-text-primary">Tidak ada berita saat ini</p>
+              <p className="text-[12px] text-primary mt-2">
+                Total berita: {news?.length || 0}
               </p>
-              <div className="flex justify-between">
-                <p className="text-[10px] font-medium text-primary">
-                  28 Feb 2024
-                </p>
-                <p className="text-[10px] font-medium text-primary hover:underline">
-                  Selengkapnya
-                </p>
-              </div>
             </div>
-          </div>
-          {/* image 3 */}
-          <div className="flex gap-8">
-            <Image
-              src="/png/image-news3.png"
-              width={112}
-              height={112}
-              alt="news 3"
-              className="rounded-[10px]"
-            />
-            <div>
-              <h1 className="text-lg font-semibold text-primary">
-                Seminggu yang lalu
-              </h1>
-              <p className="text-sm font-medium text-text-primary py-2">
-                RH Group Luncurkan Kosmetik reverse Vending Machine
-              </p>
-              <div className="flex justify-between">
-                <p className="text-[10px] font-medium text-primary">
-                  21 Feb 2024
-                </p>
-                <p className="text-[10px] font-medium text-primary hover:underline">
-                  Selengkapnya
-                </p>
-              </div>
-            </div>
-          </div>
-          {/* image 4 */}
-          <div className="flex gap-8">
-            <Image
-              src="/png/image-news4.png"
-              width={112}
-              height={112}
-              alt="news 4"
-              className="rounded-[10px]"
-            />
-            <div>
-              <h1 className="text-lg font-semibold text-primary">
-                2 Minggu yang lalu
-              </h1>
-              <p className="text-sm font-medium text-text-primary py-2">
-                Sinar Mas resmikan reverse vending Machine Di Kalibata Plaza
-              </p>
-              <div className="flex justify-between">
-                <p className="text-[10px] font-medium text-primary">
-                  18 Feb 2024
-                </p>
-                <p className="text-[10px] font-medium text-primary hover:underline">
-                  Selengkapnya
-                </p>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

@@ -7,6 +7,62 @@ import dynamic from 'next/dynamic';
 import { useLocation } from '@/contexts/LocationContext';
 import InstallButton from '@/components/InstallButton';
 
+// Simple client-side carousel component
+function NewsCarousel({ images }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setIndex((i) => (i + 1) % images.length);
+    }, 4000);
+    return () => clearInterval(t);
+  }, [images.length]);
+
+  const prev = () => setIndex((i) => (i - 1 + images.length) % images.length);
+  const next = () => setIndex((i) => (i + 1) % images.length);
+
+  return (
+    <div className="relative">
+      <div className="overflow-hidden rounded-3xl h-72">
+        <Image
+          src={images[index]}
+          alt={`news-${index}`}
+          width={900}
+          height={450}
+          className="w-full h-full object-cover rounded-3xl"
+        />
+      </div>
+
+      {/* Dots */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 top-3 flex gap-2">
+        {images.map((_, i) => (
+          <div
+            key={i}
+            className={`w-3 h-3 rounded-full ${i === index ? 'bg-white' : 'bg-white/50'}`}
+          />
+        ))}
+      </div>
+
+      {/* Prev/Next buttons */}
+      <button
+        onClick={prev}
+        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 text-white w-10 h-10 rounded-full flex items-center justify-center"
+        aria-label="previous"
+      >
+        ‹
+      </button>
+
+      <button
+        onClick={next}
+        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 text-white w-10 h-10 rounded-full flex items-center justify-center"
+        aria-label="next"
+      >
+        ›
+      </button>
+    </div>
+  );
+}
+
 // Import Leaflet secara dinamik untuk menghindari SSR issues
 const DynamicMap = dynamic(() => import('../../components/LeafletMap'), {
   ssr: false,
@@ -26,6 +82,8 @@ export default function Page() {
   const [locationsData, locationsLoading, locationsError] =
     useFetch('/api/rvm-locations');
   const [userStatsData, statsLoading, statsError] = useFetch('/api/user-stats');
+  const [newsDebugData, newsDebugLoading, newsDebugError] =
+    useFetch('/api/news-debug');
 
   // Extract data with safe defaults
   const locations = locationsData || [];
@@ -339,9 +397,13 @@ export default function Page() {
             </h1>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto mt-3 scrollbar-hide">
+          <div className="flex gap-4 overflow-x-auto mt-3 pb-2 scrollbar-hide">
             {sortedLocations.length > 0 ? (
               sortedLocations.map((rvm) => {
+                console.log('🖼️ RVM Item:', {
+                  name: rvm.name,
+                  image: rvm.image,
+                });
                 // Get status label and color
                 const getStatusInfo = (status) => {
                   switch (status) {
@@ -371,10 +433,10 @@ export default function Page() {
                 return (
                   <div
                     key={rvm.id}
-                    className="w-64 flex-shrink-0 bg-white rounded-[14px] overflow-hidden drop-shadow-md hover:drop-shadow-lg transition-shadow"
+                    className="flex-shrink-0 w-56 flex flex-col bg-white rounded-2xl overflow-hidden drop-shadow-md hover:drop-shadow-lg transition-shadow p-3"
                   >
                     {/* Image Section */}
-                    <div className="relative h-40 bg-gray-200 overflow-hidden">
+                    <div className="relative h-40 bg-gray-200 overflow-hidden rounded-xl">
                       {rvm.image && rvm.image.length > 0 ? (
                         <img
                           src={rvm.image}
@@ -382,9 +444,9 @@ export default function Page() {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             console.error(
-                              `Image failed to load for ${rvm.name}`
+                              `Image failed to load for ${rvm.name}:`,
+                              rvm.image
                             );
-                            e.target.style.display = 'none';
                           }}
                         />
                       ) : (
@@ -397,29 +459,29 @@ export default function Page() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-4 flex flex-col">
+                    <div className="p-2 flex flex-col flex-1">
                       <h3 className="text-sm font-semibold text-text-primary">
                         {rvm.name}
                       </h3>
 
                       {/* Status Badge */}
                       <div
-                        className={`inline-flex items-center gap-1.5 w-fit mt-2 px-3 py-1 rounded-full text-xs font-medium ${statusInfo.badge}`}
+                        className={`inline-flex items-center gap-1.5 w-fit mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusInfo.badge}`}
                       >
                         <Image
                           src={statusInfo.icon}
                           alt="status"
-                          width={14}
-                          height={14}
+                          width={12}
+                          height={12}
                         />
                         {statusInfo.label}
                       </div>
 
                       {/* Distance and Button */}
-                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-1.5">
                           <Image
-                            src="/svg/icon-lokasi.svg"
+                            src="/svg/location.svg"
                             alt="location"
                             width={16}
                             height={16}
@@ -435,7 +497,7 @@ export default function Page() {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <button className="px-5 py-1.5 bg-primary rounded-[6px] text-white font-medium text-xs hover:bg-primary-dark transition">
+                          <button className="px-3 py-1 bg-primary rounded-md text-white font-medium text-xs hover:bg-primary-dark transition">
                             Rute
                           </button>
                         </a>
@@ -468,13 +530,33 @@ export default function Page() {
           </Link>
         </div>
         <div className="w-full mb-28">
-          <Image
-            src="/png/image-news1.png"
-            alt="news1"
-            width={400}
-            height={400}
-            className="rounded-2xl"
-          />
+          {newsDebugLoading ? (
+            <div className="w-full h-64 bg-gray-100 rounded-2xl animate-pulse" />
+          ) : (
+            (() => {
+              const allNews = newsDebugData?.allNews || [];
+              const sorted = allNews
+                .slice()
+                .sort(
+                  (a, b) =>
+                    new Date(b.updatedAt || b.publishedAt || b.createdAt) -
+                    new Date(a.updatedAt || a.publishedAt || a.createdAt)
+                );
+
+              const images = sorted
+                .map((n) => n.imageUrl || n.image)
+                .filter(Boolean);
+
+              // Carousel component (client-side state)
+              return (
+                <div className="relative w-full">
+                  <NewsCarousel
+                    images={images.length ? images : ['/png/image-news1.png']}
+                  />
+                </div>
+              );
+            })()
+          )}
         </div>
       </div>
     </div>
