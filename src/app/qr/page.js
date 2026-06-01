@@ -14,6 +14,7 @@ export default function QRScannerPage() {
   const [cameraError, setCameraError] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [currentStream, setCurrentStream] = useState(null);
+  const [isCameraReady, setIsCameraReady] = useState(false);
   const router = useRouter();
 
   // Simplified and more reliable cleanup function
@@ -165,6 +166,7 @@ export default function QRScannerPage() {
             console.log('📱 Single camera:', cameraToUse.label);
           }
 
+          setIsCameraReady(true);
           // Add delay before starting
           await new Promise((resolve) => setTimeout(resolve, 500));
           await startScanning(qrScanner, cameraToUse.deviceId);
@@ -187,9 +189,23 @@ export default function QRScannerPage() {
     };
   }, []);
 
+  const requestCameraPermission = async () => {
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      throw new Error('Browser tidak mendukung akses kamera.');
+    }
+
+    const tempStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false,
+    });
+
+    tempStream.getTracks().forEach((track) => track.stop());
+  };
+
   const startScanning = async (qrScanner, deviceId) => {
     console.log('🎥 Starting camera scan...');
     setCameraError(null);
+    setIsScanning(false);
 
     const cameraConfigs = [
       { facingMode: 'environment' },
@@ -201,6 +217,9 @@ export default function QRScannerPage() {
       const cfg = cameraConfigs[i];
       try {
         console.log(`Trying camera config ${i + 1}:`, cfg);
+
+        // Explicitly trigger browser permission prompt before starting the scanner.
+        await requestCameraPermission();
 
         // Try to get a stream first to prompt permission and keep reference
         try {
@@ -217,7 +236,7 @@ export default function QRScannerPage() {
         }
 
         await qrScanner.start(
-          cfg,
+          deviceId,
           {
             fps: 20,
             qrbox: (width, height) => {
@@ -272,6 +291,7 @@ export default function QRScannerPage() {
         );
 
         setIsScanning(true);
+        setIsCameraReady(true);
         console.log('✅ Camera started successfully');
         return;
       } catch (error) {
@@ -279,6 +299,7 @@ export default function QRScannerPage() {
         if (i === cameraConfigs.length - 1) {
           setCameraError(`Camera failed: ${error?.message || String(error)}`);
           setIsScanning(false);
+          setIsCameraReady(false);
         }
       }
     }
@@ -374,6 +395,37 @@ export default function QRScannerPage() {
               {isScanning ? 'Camera Active' : 'Camera Inactive'}
             </span>
           </div>
+
+          {!isScanning && (
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await requestCameraPermission();
+
+                  if (!scanner || !isCameraReady) {
+                    throw new Error('Scanner belum siap. Coba lagi sebentar.');
+                  }
+
+                  const selectedCamera =
+                    cameras[currentCameraIndex] || cameras[0];
+
+                  if (!selectedCamera) {
+                    throw new Error('Kamera tidak terdeteksi.');
+                  }
+
+                  await startScanning(scanner, selectedCamera.deviceId);
+                } catch (error) {
+                  setCameraError(
+                    `Izin kamera gagal: ${error?.message || String(error)}`
+                  );
+                }
+              }}
+              className="mb-4 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-black"
+            >
+              Izinkan Kamera
+            </button>
+          )}
 
           {cameraError && (
             <div className="text-red-400 text-sm mb-4">{cameraError}</div>
