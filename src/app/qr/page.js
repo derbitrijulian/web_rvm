@@ -5,60 +5,115 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
+const READER_ID = 'qr-reader';
+
 export default function QRScannerPage() {
-  const [scanner, setScanner] = useState(null);
-  const [cameras, setCameras] = useState([]);
-  const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [cameraError, setCameraError] = useState(null);
   const [isInitializing, setIsInitializing] = useState(false);
   const [currentStream, setCurrentStream] = useState(null);
-  const [isCameraReady, setIsCameraReady] = useState(false);
   const [autoStartFailed, setAutoStartFailed] = useState(false);
-  const readerRef = useRef(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const scannerRef = useRef(null);
   const router = useRouter();
 
-  // Simplified and more reliable cleanup function
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      #${READER_ID} {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 1 !important;
+        background: #000 !important;
+      }
+      #${READER_ID} > div {
+        width: 100% !important;
+        height: 100% !important;
+      }
+      #${READER_ID} video {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
+      }
+      #${READER_ID} canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
+      }
+      #${READER_ID}__scan_region {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 10 !important;
+      }
+      #${READER_ID}__scan_region img {
+        width: 300px !important;
+        height: 300px !important;
+        border: 2px solid #00ff00 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      cleanupStreams();
+    };
+  }, []);
+
   const cleanupStreams = async () => {
     try {
-      console.log('🧹 Cleaning up camera resources...');
-
-      // Stop current stream tracks
       if (currentStream) {
         currentStream.getTracks().forEach((track) => {
           try {
             track.stop();
-            console.log('✅ Stopped track:', track.kind);
-          } catch (e) {
-            console.warn('Error stopping track:', e);
-          }
+          } catch (e) {}
         });
         setCurrentStream(null);
       }
 
-      // Stop scanner if running
-      if (scanner) {
+      const activeScanner = scannerRef.current;
+      if (activeScanner) {
         try {
-          if (isScanning) {
-            await scanner.stop();
-            setIsScanning(false);
-          }
-          console.log('✅ Scanner stopped');
-        } catch (e) {
-          console.warn('Error stopping scanner:', e);
-        }
+          const state = activeScanner.getState();
+          if (state === 2) await activeScanner.stop();
+        } catch (e) {}
+        scannerRef.current = null;
       }
 
-      // Simple delay for cleanup
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      console.log('✅ Cleanup completed');
+      setIsScanning(false);
+      await new Promise((resolve) => setTimeout(resolve, 300));
     } catch (error) {
-      console.warn('Error during cleanup:', error);
+      console.warn('Cleanup error:', error);
     }
   };
 
-  // Manual initialization function (call from button click)
+  const requestCameraPermission = async () => {
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      throw new Error('Browser tidak mendukung akses kamera.');
+    }
+    const tempStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false,
+    });
+    tempStream.getTracks().forEach((track) => track.stop());
+  };
+
   const initializeScanner = async () => {
     console.log('🔄 User triggered initialization...');
     setIsInitializing(true);
@@ -66,44 +121,37 @@ export default function QRScannerPage() {
     setCameraError(null);
 
     try {
-      // Element should be in DOM by now
-      if (!readerRef.current) {
-        throw new Error(
-          'Reader element not found. Page not properly rendered.'
-        );
+      // ✅ KEY FIX: Tunggu 1 frame render dulu sebelum getElementById
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const element = document.getElementById(READER_ID);
+      console.log('🔍 Looking for element:', READER_ID, '→', element);
+
+      if (!element) {
+        throw new Error('Reader element not found. Coba refresh halaman.');
       }
 
-      console.log('✅ Reader element accessible');
+      console.log('✅ Reader element found');
 
-      // Ensure element has id for Html5Qrcode
-      if (!readerRef.current.id) {
-        readerRef.current.id = 'reader';
-      }
-
-      // Request permission FIRST so device labels are available
       try {
         await requestCameraPermission();
       } catch (permErr) {
-        console.debug('Permission request:', permErr?.message);
-        throw new Error('Kamera tidak diizinkan. Periksa settings.');
+        throw new Error('Kamera tidak diizinkan. Periksa settings browser.');
       }
 
-      const qrScanner = new Html5Qrcode(readerRef.current.id);
-      setScanner(qrScanner);
+      const qrScanner = new Html5Qrcode(READER_ID);
+      scannerRef.current = qrScanner;
 
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(
-        (device) => device.kind === 'videoinput'
-      );
+      const videoDevices = devices.filter((d) => d.kind === 'videoinput');
 
       console.log('📱 Available cameras:', videoDevices.length);
-      setCameras(videoDevices);
 
       if (videoDevices.length === 0) {
         throw new Error('Tidak ada kamera ditemukan di device.');
       }
 
-      // Priority untuk back camera
       const backCamera = videoDevices.find((device) => {
         const label = device.label.toLowerCase();
         return (
@@ -114,93 +162,71 @@ export default function QRScannerPage() {
         );
       });
 
-      let cameraToUse =
+      const cameraToUse =
         backCamera || videoDevices[videoDevices.length - 1] || videoDevices[0];
-      console.log('🎥 Using camera:', cameraToUse.label);
+      console.log(
+        '🎥 Using camera:',
+        cameraToUse.label || cameraToUse.deviceId
+      );
 
-      setIsCameraReady(true);
-      await new Promise((resolve) => setTimeout(resolve, 500));
       await startScanning(qrScanner, cameraToUse.deviceId);
       setAutoStartFailed(false);
     } catch (error) {
       console.error('Error initializing cameras:', error);
-      const errMsg = error?.message || String(error);
-      setCameraError(errMsg);
+      setCameraError(error?.message || String(error));
       setAutoStartFailed(true);
     } finally {
       setIsInitializing(false);
     }
   };
 
-  // Setup styles on mount
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      #reader {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        z-index: 1 !important;
-        background: #000 !important;
-      }
-      #reader > div {
-        width: 100% !important;
-        height: 100% !important;
-      }
-      #reader video {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-        object-position: center !important;
-      }
-      #reader canvas {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-        object-position: center !important;
-      }
-      #reader__scan_region {
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        z-index: 10 !important;
-      }
-      #reader__scan_region img {
-        width: 300px !important;
-        height: 300px !important;
-        border: 2px solid #00ff00 !important;
-        border-radius: 12px !important;
-        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
-      }
-    `;
-    document.head.appendChild(style);
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch {
+      if (string.startsWith('/')) return true;
+      if (string.includes('localhost') || string.includes('127.0.0.1'))
+        return true;
+      return false;
+    }
+  };
 
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
+  const handleScanSuccess = async (decodedText, qrScanner) => {
+    console.log('🎯 QR Code Detected:', decodedText);
+    setScanResult(decodedText);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      cleanupStreams();
-    };
-  }, []);
+    try {
+      await qrScanner.stop();
+    } catch (e) {}
+    setIsScanning(false);
+    await cleanupStreams();
 
-  const requestCameraPermission = async () => {
-    if (!navigator?.mediaDevices?.getUserMedia) {
-      throw new Error('Browser tidak mendukung akses kamera.');
+    if (decodedText.includes('bottlein') || decodedText.includes('/bottlein')) {
+      setTimeout(() => router.push('/bottlein'), 500);
+      return;
+    }
+    if (decodedText.includes('localhost:3000')) {
+      try {
+        const url = new URL(decodedText);
+        setTimeout(() => router.push(url.pathname + url.search), 500);
+      } catch {
+        setTimeout(() => router.push('/bottlein'), 500);
+      }
+      return;
+    }
+    if (decodedText.startsWith('/')) {
+      setTimeout(() => router.push(decodedText), 500);
+      return;
+    }
+    if (isValidUrl(decodedText)) {
+      if (decodedText.startsWith('http')) window.location.href = decodedText;
+      else setTimeout(() => router.push(decodedText), 500);
+      return;
     }
 
-    const tempStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: false,
-    });
-
-    tempStream.getTracks().forEach((track) => track.stop());
+    alert(`QR Code: ${decodedText}\nMengarahkan ke halaman Bottle In...`);
+    setTimeout(() => router.push('/bottlein'), 1000);
   };
 
   const startScanning = async (qrScanner, deviceId) => {
@@ -208,7 +234,6 @@ export default function QRScannerPage() {
     setCameraError(null);
     setIsScanning(false);
 
-    // Try deviceId first (most reliable), then fallback to facingMode
     const attempts = [
       { type: 'deviceId', value: deviceId },
       { type: 'facingMode', value: 'environment' },
@@ -220,33 +245,22 @@ export default function QRScannerPage() {
       try {
         console.log(`Attempt ${i + 1}:`, attempt.type, attempt.value);
 
-        // Build constraint config
-        let constraint;
-        if (attempt.type === 'deviceId') {
-          constraint = { deviceId: { exact: attempt.value } };
-        } else {
-          constraint = { facingMode: { ideal: attempt.value } };
-        }
+        let constraint =
+          attempt.type === 'deviceId'
+            ? { deviceId: { exact: attempt.value } }
+            : { facingMode: { ideal: attempt.value } };
 
-        // Pre-test stream
-        let testStream = null;
         try {
-          testStream = await navigator.mediaDevices.getUserMedia({
+          const testStream = await navigator.mediaDevices.getUserMedia({
             video: constraint,
             audio: false,
           });
-          if (testStream) setCurrentStream(testStream);
-          console.log(`✅ Stream test passed for ${attempt.type}`);
+          setCurrentStream(testStream);
         } catch (streamErr) {
-          console.debug(
-            `Stream test failed for ${attempt.type}:`,
-            streamErr?.message
-          );
           if (i < attempts.length - 1) continue;
           throw streamErr;
         }
 
-        // For Html5Qrcode.start(), pass deviceId string or use undefined for constraints
         const startParam =
           attempt.type === 'deviceId' ? attempt.value : undefined;
 
@@ -259,46 +273,7 @@ export default function QRScannerPage() {
               return { width: size, height: size };
             },
           },
-          (decodedText) => {
-            console.log('🎯 QR Code Detected:', decodedText);
-            setScanResult(decodedText);
-            qrScanner.stop().catch(console.warn);
-            setIsScanning(false);
-            cleanupStreams();
-
-            // reuse existing result handling
-            if (
-              decodedText.includes('bottlein') ||
-              decodedText.includes('/bottlein')
-            ) {
-              setTimeout(() => router.push('/bottlein'), 500);
-              return;
-            }
-            if (decodedText.includes('localhost:3000')) {
-              try {
-                const url = new URL(decodedText);
-                setTimeout(() => router.push(url.pathname + url.search), 500);
-              } catch (e) {
-                setTimeout(() => router.push('/bottlein'), 500);
-              }
-              return;
-            }
-            if (decodedText.startsWith('/')) {
-              setTimeout(() => router.push(decodedText), 500);
-              return;
-            }
-            if (isValidUrl(decodedText)) {
-              if (decodedText.startsWith('http'))
-                window.location.href = decodedText;
-              else setTimeout(() => router.push(decodedText), 500);
-              return;
-            }
-
-            alert(
-              `QR Code: ${decodedText}\nMengarahkan ke halaman Bottle In...`
-            );
-            setTimeout(() => router.push('/bottlein'), 1000);
-          },
+          (decodedText) => handleScanSuccess(decodedText, qrScanner),
           (error) => {
             if (!String(error).includes('No QR code found'))
               console.warn('Scan error:', error);
@@ -306,72 +281,47 @@ export default function QRScannerPage() {
         );
 
         setIsScanning(true);
-        setIsCameraReady(true);
-        console.log('✅ Camera started successfully with', attempt.type);
+        console.log('✅ Camera started with', attempt.type);
         return;
       } catch (error) {
-        console.warn(
-          `Attempt ${i + 1} (${attempt.type}) failed:`,
-          error?.message || error
-        );
+        console.warn(`Attempt ${i + 1} failed:`, error?.message || error);
         if (i === attempts.length - 1) {
-          const errorMsg = `Camera failed: ${error?.message || String(error)}`;
-          setCameraError(errorMsg);
+          setCameraError(`Camera failed: ${error?.message || String(error)}`);
           setIsScanning(false);
-          setIsCameraReady(false);
-          console.error('❌ All camera attempts exhausted:', errorMsg);
         }
       }
     }
   };
 
-  const isValidUrl = (string) => {
-    try {
-      // Check if it's a valid URL
-      new URL(string);
-      return true;
-    } catch (error) {
-      // Also accept relative paths that start with /
-      if (string.startsWith('/')) {
-        return true;
-      }
-      // Accept localhost URLs
-      if (string.includes('localhost') || string.includes('127.0.0.1')) {
-        return true;
-      }
-      return false;
-    }
-  };
+  const goToPanduan = () =>
+    cleanupStreams().then(() => router.push('/panduan'));
+  const goHome = () => cleanupStreams().then(() => router.push('/home'));
 
-  const goToPanduan = () => {
-    console.log('🔄 Navigating to panduan, cleaning up camera...');
-    cleanupStreams().then(() => {
-      router.push('/panduan');
-    });
-  };
-
-  const goHome = () => {
-    console.log('🔄 Navigating home, cleaning up camera...');
-    cleanupStreams().then(() => {
-      router.push('/home');
-    });
-  };
-
-  if (isInitializing) {
-    return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // ✅ PENTING: div #qr-reader SELALU ada di DOM, loading overlay di atasnya
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* QR Reader */}
-      <div ref={readerRef} id="reader" className="w-full h-full"></div>
+      {/* QR Reader — SELALU render, tidak pernah di-unmount */}
+      {isMounted && <div id={READER_ID} className="w-full h-full" />}
+
+      {/* Loading overlay — tampil DI ATAS reader, bukan gantiin */}
+      {isInitializing && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="text-white text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4" />
+            <p>Memuat kamera...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Sebelum mount — full black screen */}
+      {!isMounted && (
+        <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+          <div className="text-white text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4" />
+            <p>Memuat halaman...</p>
+          </div>
+        </div>
+      )}
 
       {/* Top UI */}
       <div className="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/50 to-transparent">
@@ -404,19 +354,16 @@ export default function QRScannerPage() {
             Arahkan kamera ke QR code
           </div>
 
-          {/* Status indicator */}
           <div className="flex items-center justify-center mb-4">
             <div
-              className={`w-2 h-2 rounded-full ${
-                isScanning ? 'bg-green-400' : 'bg-red-400'
-              } mr-2`}
-            ></div>
+              className={`w-2 h-2 rounded-full ${isScanning ? 'bg-green-400' : 'bg-red-400'} mr-2`}
+            />
             <span className="text-white text-sm">
               {isScanning ? 'Camera Active' : 'Camera Inactive'}
             </span>
           </div>
 
-          {!isScanning && (
+          {!isScanning && !isInitializing && (
             <button
               type="button"
               onClick={initializeScanner}
