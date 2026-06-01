@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -12,7 +12,7 @@ export default function QRScannerPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [cameraError, setCameraError] = useState(null);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(false);
   const [currentStream, setCurrentStream] = useState(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [autoStartFailed, setAutoStartFailed] = useState(false);
@@ -58,7 +58,76 @@ export default function QRScannerPage() {
     }
   };
 
-  // Add custom styles for full screen camera
+  // Manual initialization function (call from button click)
+  const initializeScanner = async () => {
+    console.log('🔄 User triggered initialization...');
+    setIsInitializing(true);
+    setAutoStartFailed(false);
+    setCameraError(null);
+
+    try {
+      // Element should be in DOM by now
+      if (!readerRef.current) {
+        throw new Error(
+          'Reader element not found. Page not properly rendered.'
+        );
+      }
+
+      console.log('✅ Reader element accessible');
+
+      // Request permission FIRST so device labels are available
+      try {
+        await requestCameraPermission();
+      } catch (permErr) {
+        console.debug('Permission request:', permErr?.message);
+        throw new Error('Kamera tidak diizinkan. Periksa settings.');
+      }
+
+      const qrScanner = new Html5Qrcode('reader');
+      setScanner(qrScanner);
+
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(
+        (device) => device.kind === 'videoinput'
+      );
+
+      console.log('📱 Available cameras:', videoDevices.length);
+      setCameras(videoDevices);
+
+      if (videoDevices.length === 0) {
+        throw new Error('Tidak ada kamera ditemukan di device.');
+      }
+
+      // Priority untuk back camera
+      const backCamera = videoDevices.find((device) => {
+        const label = device.label.toLowerCase();
+        return (
+          label.includes('back') ||
+          label.includes('environment') ||
+          label.includes('rear') ||
+          label.includes('world')
+        );
+      });
+
+      let cameraToUse =
+        backCamera || videoDevices[videoDevices.length - 1] || videoDevices[0];
+      console.log('🎥 Using camera:', cameraToUse.label);
+
+      setIsCameraReady(true);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await startScanning(qrScanner, cameraToUse.deviceId);
+      setAutoStartFailed(false);
+    } catch (error) {
+      console.error('Error initializing cameras:', error);
+      const errMsg = error?.message || String(error);
+      setCameraError(errMsg);
+      setAutoStartFailed(true);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  // Setup styles on mount
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -109,106 +178,8 @@ export default function QRScannerPage() {
     };
   }, []);
 
-  useLayoutEffect(() => {
-    const initializeScanner = async () => {
-      // Wait for ref to be available (with extended timeout for production)
-      let attempts = 0;
-      const maxAttempts = 30; // 3 seconds total (30 * 100ms)
-      while (attempts < maxAttempts && !readerRef.current) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        attempts++;
-      }
-
-      if (!readerRef.current) {
-        console.error(
-          `❌ Reader element not available after ${maxAttempts * 100}ms`
-        );
-        setCameraError('Halaman render gagal. Coba refresh.');
-        setAutoStartFailed(true);
-        setIsInitializing(false);
-        return;
-      }
-
-      console.log('✅ Reader element found on attempt', attempts + 1);
-
-      try {
-        // Force comprehensive cleanup first
-        await cleanupStreams();
-
-        console.log('🔄 Initializing camera...');
-
-        // Request permission FIRST so device labels are available
-        try {
-          await requestCameraPermission();
-        } catch (permErr) {
-          console.debug('Permission request during init:', permErr?.message);
-        }
-
-        const qrScanner = new Html5Qrcode('reader');
-        setScanner(qrScanner);
-
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(
-          (device) => device.kind === 'videoinput'
-        );
-
-        console.log('📱 Available cameras:', videoDevices.length);
-        setCameras(videoDevices);
-
-        if (videoDevices.length > 0) {
-          // Priority untuk back camera
-          const backCamera = videoDevices.find((device) => {
-            const label = device.label.toLowerCase();
-            return (
-              label.includes('back') ||
-              label.includes('environment') ||
-              label.includes('rear') ||
-              label.includes('world')
-            );
-          });
-
-          let cameraToUse;
-          if (backCamera) {
-            cameraToUse = backCamera;
-            console.log('✅ Using back camera:', backCamera.label);
-          } else if (videoDevices.length > 1) {
-            // Use last camera (usually back)
-            cameraToUse = videoDevices[videoDevices.length - 1];
-            console.log(
-              '⚠️ No back camera found, using last camera:',
-              cameraToUse.label
-            );
-          } else {
-            // Single camera
-            cameraToUse = videoDevices[0];
-            console.log('📱 Single camera:', cameraToUse.label);
-          }
-
-          setIsCameraReady(true);
-          // Add delay before starting
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          await startScanning(qrScanner, cameraToUse.deviceId);
-          setAutoStartFailed(false);
-        } else {
-          const msg = 'No cameras found.';
-          console.error(msg);
-          setCameraError(msg);
-          setAutoStartFailed(true);
-        }
-      } catch (error) {
-        console.error('Error initializing cameras:', error);
-        const errMsg = `Camera init failed: ${error?.message || String(error)}`;
-        setCameraError(errMsg);
-        setAutoStartFailed(true);
-      } finally {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        setIsInitializing(false);
-      }
-    };
-
-    initializeScanner();
-
-    // Cleanup on component unmount
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
       cleanupStreams();
     };
@@ -383,7 +354,7 @@ export default function QRScannerPage() {
       <div className="fixed inset-0 bg-black flex items-center justify-center">
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Initializing camera...</p>
+          <p>Loading...</p>
         </div>
       </div>
     );
@@ -437,39 +408,13 @@ export default function QRScannerPage() {
             </span>
           </div>
 
-          {!isScanning && autoStartFailed && (
+          {!isScanning && (
             <button
               type="button"
-              onClick={async () => {
-                try {
-                  setAutoStartFailed(false);
-                  setCameraError(null);
-
-                  if (scanner) {
-                    await cleanupStreams();
-                  }
-
-                  await requestCameraPermission();
-
-                  if (!cameras || cameras.length === 0) {
-                    throw new Error('Kamera tidak terdeteksi.');
-                  }
-
-                  const selectedCamera =
-                    cameras[currentCameraIndex] || cameras[0];
-                  const newScanner = new Html5Qrcode('reader');
-                  setScanner(newScanner);
-                  await startScanning(newScanner, selectedCamera.deviceId);
-                } catch (error) {
-                  const errMsg = error?.message || String(error);
-                  setCameraError(`Kamera gagal: ${errMsg}`);
-                  setAutoStartFailed(true);
-                  console.error('Retry button error:', error);
-                }
-              }}
+              onClick={initializeScanner}
               className="mb-4 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-black"
             >
-              🔄 Coba Lagi
+              {autoStartFailed ? '🔄 Coba Lagi' : '▶️ Mulai Scan'}
             </button>
           )}
 
