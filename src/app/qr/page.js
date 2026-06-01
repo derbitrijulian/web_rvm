@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -16,6 +16,7 @@ export default function QRScannerPage() {
   const [currentStream, setCurrentStream] = useState(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [autoStartFailed, setAutoStartFailed] = useState(false);
+  const readerRef = useRef(null);
   const router = useRouter();
 
   // Simplified and more reliable cleanup function
@@ -108,31 +109,27 @@ export default function QRScannerPage() {
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const initializeScanner = async () => {
-      const qrReaderId = 'reader';
-
-      // Wait for DOM to be ready with retry logic for production
+      // Wait for ref to be available (with extended timeout for production)
       let attempts = 0;
-      const maxAttempts = 10;
-      while (attempts < maxAttempts) {
-        if (document.getElementById(qrReaderId)) {
-          console.log('✅ Element found on attempt', attempts + 1);
-          break;
-        }
+      const maxAttempts = 30; // 3 seconds total (30 * 100ms)
+      while (attempts < maxAttempts && !readerRef.current) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
         attempts++;
-        await new Promise((resolve) => setTimeout(resolve, 150));
       }
 
-      if (!document.getElementById(qrReaderId)) {
+      if (!readerRef.current) {
         console.error(
-          `❌ Element with ID '${qrReaderId}' not available after ${maxAttempts} attempts`
+          `❌ Reader element not available after ${maxAttempts * 100}ms`
         );
-        setCameraError('Halaman tidak siap. Coba refresh.');
+        setCameraError('Halaman render gagal. Coba refresh.');
         setAutoStartFailed(true);
         setIsInitializing(false);
         return;
       }
+
+      console.log('✅ Reader element found on attempt', attempts + 1);
 
       try {
         // Force comprehensive cleanup first
@@ -147,7 +144,7 @@ export default function QRScannerPage() {
           console.debug('Permission request during init:', permErr?.message);
         }
 
-        const qrScanner = new Html5Qrcode(qrReaderId);
+        const qrScanner = new Html5Qrcode('reader');
         setScanner(qrScanner);
 
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -395,7 +392,7 @@ export default function QRScannerPage() {
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
       {/* QR Reader */}
-      <div id="reader" className="w-full h-full"></div>
+      <div ref={readerRef} id="reader" className="w-full h-full"></div>
 
       {/* Top UI */}
       <div className="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/50 to-transparent">
