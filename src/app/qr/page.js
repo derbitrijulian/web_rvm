@@ -348,6 +348,13 @@ export default function QRScannerPage() {
     });
   };
 
+  const goHome = () => {
+    console.log('🔄 Navigating home, cleaning up camera...');
+    cleanupStreams().then(() => {
+      router.push('/home');
+    });
+  };
+
   if (isInitializing) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center">
@@ -368,7 +375,7 @@ export default function QRScannerPage() {
       <div className="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/50 to-transparent">
         <div className="flex justify-between items-center">
           <button
-            onClick={() => router.back()}
+            onClick={goHome}
             className="text-white bg-black/50 rounded-full p-2"
           >
             <Image

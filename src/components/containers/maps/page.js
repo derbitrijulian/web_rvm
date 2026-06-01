@@ -167,10 +167,14 @@ export default function Map({ searchQuery = '' }) {
           return {
             id: item.id,
             name: item.name,
+            address: item.address,
+            image: item.image,
             position: [lat, lng],
             locationName: 'Loading location...',
             capacity: item.capacity,
             capacityStatus: item.capacityStatus,
+            operationalHours: item.operationalHours,
+            contactNumber: item.contactNumber,
             created_at: item.created_at,
           };
         });
@@ -731,41 +735,67 @@ export default function Map({ searchQuery = '' }) {
               }}
             >
               <Popup>
-                <div className="min-w-[200px]">
-                  <h3 className="font-bold text-lg mb-2">{rvm.name}</h3>
-                  <p>
-                    <strong>Location:</strong>{' '}
-                    {rvm.locationName || 'Loading...'}
-                  </p>
-                  <p>
-                    <strong>Capacity:</strong> {rvm.capacity}%
-                  </p>
-                  <p>
-                    <strong>Status:</strong>
-                    <span
-                      className={`ml-1 px-2 py-1 rounded text-xs ${
-                        rvm.capacityStatus === 'ACTIVE'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {rvm.capacityStatus}
-                    </span>
-                  </p>
-                  <p>
-                    <strong>Created:</strong>{' '}
-                    {new Date(rvm.created_at).toLocaleDateString()}
-                  </p>
-                  {distance !== null && (
-                    <p className="mt-2">
-                      <strong>Distance:</strong>
-                      <span className="ml-1 text-blue-600 font-semibold">
-                        {distance >= 1000
-                          ? `${(distance / 1000).toFixed(2)} km`
-                          : `${distance.toFixed(0)} m`}
-                      </span>
-                    </p>
-                  )}
+                <div className="w-[280px] overflow-hidden rounded-2xl bg-white">
+                  <div className="relative h-36 w-full bg-gray-200">
+                    {rvm.image ? (
+                      <img
+                        src={rvm.image}
+                        alt={rvm.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 text-sm text-gray-400">
+                        Tidak ada foto
+                      </div>
+                    )}
+
+                    <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/55 to-transparent" />
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <div className="text-white font-semibold text-base leading-tight drop-shadow-sm">
+                        {rvm.name}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 p-4 text-sm text-slate-700">
+                    <div>
+                      <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                        Location
+                      </div>
+                      <div className="mt-1 leading-5 text-slate-700">
+                        {rvm.locationName || rvm.address || 'Loading...'}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl bg-slate-50 p-3">
+                        <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                          Capacity
+                        </div>
+                        <div className="mt-1 text-base font-bold text-slate-800">
+                          {rvm.capacity}
+                        </div>
+                      </div>
+                      <div className="rounded-xl bg-slate-50 p-3">
+                        <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                          Distance
+                        </div>
+                        <div className="mt-1 text-base font-bold text-blue-600">
+                          {distance !== null
+                            ? distance >= 1000
+                              ? `${(distance / 1000).toFixed(2)} km`
+                              : `${distance.toFixed(0)} m`
+                            : '-'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-start gap-2 text-[11px]">
+                      <div className="rounded-full bg-emerald-100 px-2.5 py-1 font-semibold text-emerald-700">
+                        {rvm.capacityStatus}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </Popup>
             </Marker>
