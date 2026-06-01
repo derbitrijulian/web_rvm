@@ -112,11 +112,24 @@ export default function QRScannerPage() {
     const initializeScanner = async () => {
       const qrReaderId = 'reader';
 
-      // Wait for DOM to be ready
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Wait for DOM to be ready with retry logic for production
+      let attempts = 0;
+      const maxAttempts = 10;
+      while (attempts < maxAttempts) {
+        if (document.getElementById(qrReaderId)) {
+          console.log('✅ Element found on attempt', attempts + 1);
+          break;
+        }
+        attempts++;
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      }
 
       if (!document.getElementById(qrReaderId)) {
-        console.warn(`Element with ID '${qrReaderId}' is not available.`);
+        console.error(
+          `❌ Element with ID '${qrReaderId}' not available after ${maxAttempts} attempts`
+        );
+        setCameraError('Halaman tidak siap. Coba refresh.');
+        setAutoStartFailed(true);
         setIsInitializing(false);
         return;
       }
