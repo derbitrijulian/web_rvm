@@ -190,21 +190,34 @@ export default function QRScannerPage() {
   const startScanning = async (qrScanner, deviceId) => {
     console.log('🎥 Starting camera scan...');
     setCameraError(null);
-    setIsScanning(true);
 
-    // Simple, reliable camera start with back camera priority
-    const constraints = [
-      { facingMode: 'environment' }, // Back camera
-      { deviceId: deviceId }, // Specific device
-      { video: true }, // Fallback
+    const cameraConfigs = [
+      { facingMode: 'environment' },
+      { deviceId: { exact: deviceId } },
+      { video: true },
     ];
 
-    for (let i = 0; i < constraints.length; i++) {
+    for (let i = 0; i < cameraConfigs.length; i++) {
+      const cfg = cameraConfigs[i];
       try {
-        console.log(`Trying camera constraint ${i + 1}:`, constraints[i]);
+        console.log(`Trying camera config ${i + 1}:`, cfg);
+
+        // Try to get a stream first to prompt permission and keep reference
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: cfg,
+          });
+          if (stream) setCurrentStream(stream);
+        } catch (streamErr) {
+          console.debug(
+            'getUserMedia failed for config',
+            cfg,
+            streamErr?.message || streamErr
+          );
+        }
 
         await qrScanner.start(
-          constraints[i],
+          cfg,
           {
             fps: 20,
             qrbox: (width, height) => {
@@ -215,108 +228,56 @@ export default function QRScannerPage() {
           (decodedText) => {
             console.log('🎯 QR Code Detected:', decodedText);
             setScanResult(decodedText);
-
-            // Stop scanner immediately
             qrScanner.stop().catch(console.warn);
             setIsScanning(false);
-
-            // Clean up streams
             cleanupStreams();
 
-            // Handle different types of QR codes
-            console.log('🔄 Processing QR result...');
-
-            // Special handling for bottlein
+            // reuse existing result handling
             if (
               decodedText.includes('bottlein') ||
               decodedText.includes('/bottlein')
             ) {
-              console.log('✅ Detected bottlein QR, redirecting...');
-              setTimeout(() => {
-                router.push('/bottlein');
-              }, 500);
+              setTimeout(() => router.push('/bottlein'), 500);
               return;
             }
-
-            // Handle full URLs
-            if (
-              decodedText.startsWith('http://localhost:3000/bottlein') ||
-              decodedText.startsWith('https://localhost:3000/bottlein')
-            ) {
-              console.log('✅ Detected localhost bottlein URL, redirecting...');
-              setTimeout(() => {
-                router.push('/bottlein');
-              }, 500);
-              return;
-            }
-
-            // Handle any localhost URL
             if (decodedText.includes('localhost:3000')) {
-              console.log('✅ Detected localhost URL:', decodedText);
               try {
                 const url = new URL(decodedText);
-                setTimeout(() => {
-                  router.push(url.pathname + url.search);
-                }, 500);
+                setTimeout(() => router.push(url.pathname + url.search), 500);
               } catch (e) {
-                console.error('Error parsing localhost URL:', e);
-                setTimeout(() => {
-                  router.push('/bottlein');
-                }, 500);
+                setTimeout(() => router.push('/bottlein'), 500);
               }
               return;
             }
-
-            // Handle relative paths
             if (decodedText.startsWith('/')) {
-              console.log('✅ Detected relative path:', decodedText);
-              setTimeout(() => {
-                router.push(decodedText);
-              }, 500);
+              setTimeout(() => router.push(decodedText), 500);
               return;
             }
-
-            // Handle full URLs
             if (isValidUrl(decodedText)) {
-              console.log('✅ Detected valid URL:', decodedText);
-              if (decodedText.startsWith('http')) {
+              if (decodedText.startsWith('http'))
                 window.location.href = decodedText;
-              } else {
-                setTimeout(() => {
-                  router.push(decodedText);
-                }, 500);
-              }
+              else setTimeout(() => router.push(decodedText), 500);
               return;
             }
 
-            // Default fallback - assume it's for bottlein
-            console.log(
-              '⚠️ Unknown QR format, defaulting to bottlein:',
-              decodedText
-            );
             alert(
               `QR Code: ${decodedText}\nMengarahkan ke halaman Bottle In...`
             );
-            setTimeout(() => {
-              router.push('/bottlein');
-            }, 1000);
+            setTimeout(() => router.push('/bottlein'), 1000);
           },
           (error) => {
-            // Suppress common scanning errors
-            if (!error.includes('No QR code found')) {
+            if (!String(error).includes('No QR code found'))
               console.warn('Scan error:', error);
-            }
           }
         );
 
+        setIsScanning(true);
         console.log('✅ Camera started successfully');
-        return; // Success, exit function
+        return;
       } catch (error) {
-        console.warn(`Camera constraint ${i + 1} failed:`, error.message);
-
-        if (i === constraints.length - 1) {
-          // Last attempt failed
-          setCameraError(`Camera failed: ${error.message}`);
+        console.warn(`Camera config ${i + 1} failed:`, error?.message || error);
+        if (i === cameraConfigs.length - 1) {
+          setCameraError(`Camera failed: ${error?.message || String(error)}`);
           setIsScanning(false);
         }
       }
