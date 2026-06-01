@@ -75,6 +75,11 @@ export default function QRScannerPage() {
 
       console.log('✅ Reader element accessible');
 
+      // Ensure element has id for Html5Qrcode
+      if (!readerRef.current.id) {
+        readerRef.current.id = 'reader';
+      }
+
       // Request permission FIRST so device labels are available
       try {
         await requestCameraPermission();
@@ -83,7 +88,7 @@ export default function QRScannerPage() {
         throw new Error('Kamera tidak diizinkan. Periksa settings.');
       }
 
-      const qrScanner = new Html5Qrcode('reader');
+      const qrScanner = new Html5Qrcode(readerRef.current.id);
       setScanner(qrScanner);
 
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -205,29 +210,29 @@ export default function QRScannerPage() {
 
     // Try deviceId first (most reliable), then fallback to facingMode
     const attempts = [
-      { type: 'deviceId', deviceId },
-      { type: 'facingMode', facingMode: 'environment' },
-      { type: 'facingMode', facingMode: 'user' }, // Last resort
+      { type: 'deviceId', value: deviceId },
+      { type: 'facingMode', value: 'environment' },
+      { type: 'facingMode', value: 'user' },
     ];
 
     for (let i = 0; i < attempts.length; i++) {
       const attempt = attempts[i];
       try {
-        console.log(`Attempt ${i + 1}:`, attempt.type, attempt);
+        console.log(`Attempt ${i + 1}:`, attempt.type, attempt.value);
 
-        // Build config for Html5Qrcode based on attempt type
-        let config;
+        // Build constraint config
+        let constraint;
         if (attempt.type === 'deviceId') {
-          config = { deviceId: { exact: attempt.deviceId } };
+          constraint = { deviceId: { exact: attempt.value } };
         } else {
-          config = { facingMode: { ideal: attempt.facingMode } };
+          constraint = { facingMode: { ideal: attempt.value } };
         }
 
-        // Pre-test stream to ensure permission and constraint works
+        // Pre-test stream
         let testStream = null;
         try {
           testStream = await navigator.mediaDevices.getUserMedia({
-            video: config,
+            video: constraint,
             audio: false,
           });
           if (testStream) setCurrentStream(testStream);
@@ -237,13 +242,16 @@ export default function QRScannerPage() {
             `Stream test failed for ${attempt.type}:`,
             streamErr?.message
           );
-          // Continue to next attempt if stream test fails
           if (i < attempts.length - 1) continue;
-          throw streamErr; // Throw if this was last attempt
+          throw streamErr;
         }
 
+        // For Html5Qrcode.start(), pass deviceId string or use undefined for constraints
+        const startParam =
+          attempt.type === 'deviceId' ? attempt.value : undefined;
+
         await qrScanner.start(
-          attempt.deviceId || { facingMode: attempt.facingMode },
+          startParam,
           {
             fps: 20,
             qrbox: (width, height) => {
