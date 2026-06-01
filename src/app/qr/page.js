@@ -126,6 +126,13 @@ export default function QRScannerPage() {
 
         console.log('🔄 Initializing camera...');
 
+        // Request permission FIRST so device labels are available
+        try {
+          await requestCameraPermission();
+        } catch (permErr) {
+          console.debug('Permission request during init:', permErr?.message);
+        }
+
         const qrScanner = new Html5Qrcode(qrReaderId);
         setScanner(qrScanner);
 
@@ -203,40 +210,51 @@ export default function QRScannerPage() {
   };
 
   const startScanning = async (qrScanner, deviceId) => {
-    console.log('🎥 Starting camera scan...');
+    console.log('🎥 Starting camera scan...', { deviceId });
     setCameraError(null);
     setIsScanning(false);
 
-    const cameraConfigs = [
-      { facingMode: { exact: 'environment' } },
-      { facingMode: 'environment' },
-      { deviceId: { exact: deviceId } },
+    // Try deviceId first (most reliable), then fallback to facingMode
+    const attempts = [
+      { type: 'deviceId', deviceId },
+      { type: 'facingMode', facingMode: 'environment' },
+      { type: 'facingMode', facingMode: 'user' }, // Last resort
     ];
 
-    for (let i = 0; i < cameraConfigs.length; i++) {
-      const cfg = cameraConfigs[i];
+    for (let i = 0; i < attempts.length; i++) {
+      const attempt = attempts[i];
       try {
-        console.log(`Trying camera config ${i + 1}:`, cfg);
+        console.log(`Attempt ${i + 1}:`, attempt.type, attempt);
 
-        // Explicitly trigger browser permission prompt before starting the scanner.
-        await requestCameraPermission();
+        // Build config for Html5Qrcode based on attempt type
+        let config;
+        if (attempt.type === 'deviceId') {
+          config = { deviceId: { exact: attempt.deviceId } };
+        } else {
+          config = { facingMode: { ideal: attempt.facingMode } };
+        }
 
-        // Try to get a stream first to prompt permission and keep reference
+        // Pre-test stream to ensure permission and constraint works
+        let testStream = null;
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: cfg,
+          testStream = await navigator.mediaDevices.getUserMedia({
+            video: config,
+            audio: false,
           });
-          if (stream) setCurrentStream(stream);
+          if (testStream) setCurrentStream(testStream);
+          console.log(`✅ Stream test passed for ${attempt.type}`);
         } catch (streamErr) {
           console.debug(
-            'getUserMedia failed for config',
-            cfg,
-            streamErr?.message || streamErr
+            `Stream test failed for ${attempt.type}:`,
+            streamErr?.message
           );
+          // Continue to next attempt if stream test fails
+          if (i < attempts.length - 1) continue;
+          throw streamErr; // Throw if this was last attempt
         }
 
         await qrScanner.start(
-          cfg,
+          attempt.deviceId || { facingMode: attempt.facingMode },
           {
             fps: 20,
             qrbox: (width, height) => {
@@ -292,14 +310,19 @@ export default function QRScannerPage() {
 
         setIsScanning(true);
         setIsCameraReady(true);
-        console.log('✅ Camera started successfully');
+        console.log('✅ Camera started successfully with', attempt.type);
         return;
       } catch (error) {
-        console.warn(`Camera config ${i + 1} failed:`, error?.message || error);
-        if (i === cameraConfigs.length - 1) {
-          setCameraError(`Camera failed: ${error?.message || String(error)}`);
+        console.warn(
+          `Attempt ${i + 1} (${attempt.type}) failed:`,
+          error?.message || error
+        );
+        if (i === attempts.length - 1) {
+          const errorMsg = `Camera failed: ${error?.message || String(error)}`;
+          setCameraError(errorMsg);
           setIsScanning(false);
           setIsCameraReady(false);
+          console.error('❌ All camera attempts exhausted:', errorMsg);
         }
       }
     }
