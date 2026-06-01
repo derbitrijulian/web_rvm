@@ -7,6 +7,15 @@ import Image from 'next/image';
 
 const READER_ID = 'qr-reader';
 
+// ✅ Deteksi iOS
+const isIOS = () => {
+  if (typeof window === 'undefined') return false;
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  );
+};
+
 export default function QRScannerPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
@@ -121,18 +130,13 @@ export default function QRScannerPage() {
     setCameraError(null);
 
     try {
-      // ✅ KEY FIX: Tunggu 1 frame render dulu sebelum getElementById
       await new Promise((resolve) => requestAnimationFrame(resolve));
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const element = document.getElementById(READER_ID);
-      console.log('🔍 Looking for element:', READER_ID, '→', element);
-
       if (!element) {
         throw new Error('Reader element not found. Coba refresh halaman.');
       }
-
-      console.log('✅ Reader element found');
 
       try {
         await requestCameraPermission();
@@ -145,8 +149,6 @@ export default function QRScannerPage() {
 
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = devices.filter((d) => d.kind === 'videoinput');
-
-      console.log('📱 Available cameras:', videoDevices.length);
 
       if (videoDevices.length === 0) {
         throw new Error('Tidak ada kamera ditemukan di device.');
@@ -230,48 +232,99 @@ export default function QRScannerPage() {
   };
 
   const startScanning = async (qrScanner, deviceId) => {
-    console.log('🎥 Starting camera scan...', { deviceId });
+    console.log('🎥 Starting camera scan...', { deviceId, isIOS: isIOS() });
     setCameraError(null);
     setIsScanning(false);
 
-    const attempts = [
-      { type: 'deviceId', value: deviceId },
-      { type: 'facingMode', value: 'environment' },
-      { type: 'facingMode', value: 'user' },
-    ];
+    // ✅ Config khusus iOS vs Android
+    const iosVideoConstraints = {
+      facingMode: { ideal: 'environment' },
+      // iOS: pakai resolusi rendah biar tidak zoom
+      width: { ideal: 1280, max: 1920 },
+      height: { ideal: 720, max: 1080 },
+    };
+
+    const androidVideoConstraints = {
+      deviceId: { exact: deviceId },
+    };
+
+    const attempts = isIOS()
+      ? [
+          // iOS: prioritas facingMode, jangan pakai deviceId (sering bermasalah di Safari)
+          {
+            type: 'facingMode',
+            value: 'environment',
+            constraints: iosVideoConstraints,
+          },
+          {
+            type: 'facingMode',
+            value: 'user',
+            constraints: {
+              facingMode: 'user',
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+          },
+        ]
+      : [
+          // Android: prioritas deviceId
+          {
+            type: 'deviceId',
+            value: deviceId,
+            constraints: { deviceId: { exact: deviceId } },
+          },
+          {
+            type: 'facingMode',
+            value: 'environment',
+            constraints: { facingMode: { ideal: 'environment' } },
+          },
+          {
+            type: 'facingMode',
+            value: 'user',
+            constraints: { facingMode: { ideal: 'user' } },
+          },
+        ];
 
     for (let i = 0; i < attempts.length; i++) {
       const attempt = attempts[i];
       try {
         console.log(`Attempt ${i + 1}:`, attempt.type, attempt.value);
 
-        let constraint =
-          attempt.type === 'deviceId'
-            ? { deviceId: { exact: attempt.value } }
-            : { facingMode: { ideal: attempt.value } };
-
+        // Pre-test stream dengan constraint yang sudah disesuaikan
         try {
           const testStream = await navigator.mediaDevices.getUserMedia({
-            video: constraint,
+            video: attempt.constraints,
             audio: false,
           });
           setCurrentStream(testStream);
+          console.log(`✅ Stream test passed`);
         } catch (streamErr) {
+          console.warn(`Stream test failed:`, streamErr?.message);
           if (i < attempts.length - 1) continue;
           throw streamErr;
         }
 
+        // ✅ Untuk iOS pakai facingMode string, Android pakai deviceId
         const startParam =
           attempt.type === 'deviceId' ? attempt.value : undefined;
 
+        // ✅ qrbox lebih kecil di iOS biar tidak terasa zoom
+        const qrboxFn = (width, height) => {
+          const minDim = Math.min(width, height);
+          const size = isIOS()
+            ? Math.floor(minDim * 0.5) // iOS: 50% dari layar
+            : Math.floor(minDim * 0.6); // Android: 60% dari layar
+          return { width: size, height: size };
+        };
+
         await qrScanner.start(
-          startParam,
+          // ✅ iOS: pakai object facingMode, bukan deviceId string
+          isIOS() ? { facingMode: 'environment' } : startParam,
           {
-            fps: 20,
-            qrbox: (width, height) => {
-              const size = Math.min(width, height) * 0.6;
-              return { width: size, height: size };
-            },
+            fps: isIOS() ? 10 : 20, // ✅ iOS fps lebih rendah, lebih stabil
+            qrbox: qrboxFn,
+            // ✅ iOS: tambahkan videoConstraints langsung ke config
+            videoConstraints: attempt.constraints,
           },
           (decodedText) => handleScanSuccess(decodedText, qrScanner),
           (error) => {
@@ -297,13 +350,10 @@ export default function QRScannerPage() {
     cleanupStreams().then(() => router.push('/panduan'));
   const goHome = () => cleanupStreams().then(() => router.push('/home'));
 
-  // ✅ PENTING: div #qr-reader SELALU ada di DOM, loading overlay di atasnya
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* QR Reader — SELALU render, tidak pernah di-unmount */}
       {isMounted && <div id={READER_ID} className="w-full h-full" />}
 
-      {/* Loading overlay — tampil DI ATAS reader, bukan gantiin */}
       {isInitializing && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="text-white text-center">
@@ -313,7 +363,6 @@ export default function QRScannerPage() {
         </div>
       )}
 
-      {/* Sebelum mount — full black screen */}
       {!isMounted && (
         <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
           <div className="text-white text-center">
