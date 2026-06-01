@@ -208,9 +208,9 @@ export default function QRScannerPage() {
     setIsScanning(false);
 
     const cameraConfigs = [
+      { facingMode: { exact: 'environment' } },
       { facingMode: 'environment' },
       { deviceId: { exact: deviceId } },
-      { video: true },
     ];
 
     for (let i = 0; i < cameraConfigs.length; i++) {
@@ -236,7 +236,7 @@ export default function QRScannerPage() {
         }
 
         await qrScanner.start(
-          deviceId,
+          cfg,
           {
             fps: 20,
             qrbox: (width, height) => {
