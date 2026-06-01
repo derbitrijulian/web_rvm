@@ -15,6 +15,7 @@ export default function QRScannerPage() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [currentStream, setCurrentStream] = useState(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
+  const [autoStartFailed, setAutoStartFailed] = useState(false);
   const router = useRouter();
 
   // Simplified and more reliable cleanup function
@@ -177,13 +178,20 @@ export default function QRScannerPage() {
           // Add delay before starting
           await new Promise((resolve) => setTimeout(resolve, 500));
           await startScanning(qrScanner, cameraToUse.deviceId);
+          setAutoStartFailed(false);
         } else {
-          setCameraError('No cameras found.');
+          const msg = 'No cameras found.';
+          console.error(msg);
+          setCameraError(msg);
+          setAutoStartFailed(true);
         }
       } catch (error) {
         console.error('Error initializing cameras:', error);
-        setCameraError(`Camera initialization failed: ${error.message}`);
+        const errMsg = `Camera init failed: ${error?.message || String(error)}`;
+        setCameraError(errMsg);
+        setAutoStartFailed(true);
       } finally {
+        await new Promise((resolve) => setTimeout(resolve, 800));
         setIsInitializing(false);
       }
     };
@@ -419,34 +427,39 @@ export default function QRScannerPage() {
             </span>
           </div>
 
-          {!isScanning && (
+          {!isScanning && autoStartFailed && (
             <button
               type="button"
               onClick={async () => {
                 try {
+                  setAutoStartFailed(false);
+                  setCameraError(null);
+
+                  if (scanner) {
+                    await cleanupStreams();
+                  }
+
                   await requestCameraPermission();
 
-                  if (!scanner || !isCameraReady) {
-                    throw new Error('Scanner belum siap. Coba lagi sebentar.');
+                  if (!cameras || cameras.length === 0) {
+                    throw new Error('Kamera tidak terdeteksi.');
                   }
 
                   const selectedCamera =
                     cameras[currentCameraIndex] || cameras[0];
-
-                  if (!selectedCamera) {
-                    throw new Error('Kamera tidak terdeteksi.');
-                  }
-
-                  await startScanning(scanner, selectedCamera.deviceId);
+                  const newScanner = new Html5Qrcode('reader');
+                  setScanner(newScanner);
+                  await startScanning(newScanner, selectedCamera.deviceId);
                 } catch (error) {
-                  setCameraError(
-                    `Izin kamera gagal: ${error?.message || String(error)}`
-                  );
+                  const errMsg = error?.message || String(error);
+                  setCameraError(`Kamera gagal: ${errMsg}`);
+                  setAutoStartFailed(true);
+                  console.error('Retry button error:', error);
                 }
               }}
               className="mb-4 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-black"
             >
-              Izinkan Kamera
+              🔄 Coba Lagi
             </button>
           )}
 
