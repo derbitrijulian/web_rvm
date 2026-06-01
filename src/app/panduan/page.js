@@ -104,7 +104,7 @@ export default function Page() {
             />
             <div className=" w-[138.44px]">
               <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
-                Lorem epsium, lorem epsium, Lorem Epsium
+                Temukan mesin Reverse Vending Machine (RVM) terdekat.
               </p>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function Page() {
             />
             <div className=" w-[138.44px]">
               <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
-                Lorem epsium, lorem epsium, Lorem Epsium
+                Scan QR Code yang tersedia pada mesin RVM menggunakan aplikasi.
               </p>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function Page() {
             />
             <div className=" w-[138.44px]">
               <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
-                Lorem epsium, lorem epsium, Lorem Epsium
+                Pastikan aplikasi berhasil terhubung dengan mesin RVM.
               </p>
             </div>
           </div>
@@ -143,7 +143,7 @@ export default function Page() {
             />
             <div className=" w-[138.44px]">
               <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
-                Lorem epsium, lorem epsium, Lorem Epsium
+                Siapkan botol plastik kosong yang akan didaur ulang.
               </p>
             </div>
           </div>
@@ -156,7 +156,7 @@ export default function Page() {
             />
             <div className=" w-[138.44px]">
               <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
-                Lorem epsium, lorem epsium, Lorem Epsium
+                Masukkan botol ke dalam lubang input pada mesin.
               </p>
             </div>
           </div>
@@ -169,7 +169,8 @@ export default function Page() {
             />
             <div className=" w-[138.44px]">
               <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
-                Lorem epsium, lorem epsium, Lorem Epsium
+                Tunggu hingga indikator berwarna hijau, menandakan botol
+                berhasil diterima.
               </p>
             </div>
           </div>
@@ -182,7 +183,7 @@ export default function Page() {
             />
             <div className=" w-[138.44px]">
               <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
-                Lorem epsium, lorem epsium, Lorem Epsium
+                Tekan tombol "Ambil Poin" pada aplikasi.
               </p>
             </div>
           </div>
@@ -195,7 +196,7 @@ export default function Page() {
             />
             <div className=" w-[138.44px]">
               <p className="text-xs font-semibold text-wrap text-center pt-2 text-text-primary">
-                Lorem epsium, lorem epsium, Lorem Epsium
+                Poin berhasil diterima dan otomatis masuk ke akun Anda.
               </p>
             </div>
           </div>

@@ -92,7 +92,7 @@ export default function Page() {
                 placeholder="Masukkan Kata Sandi"
                 value={formData.password}
                 onChange={handleChange}
-                className="text-text-primary pl-3 py-3 w-full text-sm focus:outline-none bg-transparent"
+                className="text-text-primary pl-3 py-3 w-full text-sm focus:outline-none rounded-[10px]"
               />
               <button
                 type="button"

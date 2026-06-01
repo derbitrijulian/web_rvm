@@ -21,6 +21,8 @@ export default function QRScannerPage() {
   const [scanResult, setScanResult] = useState(null);
   const [cameraError, setCameraError] = useState(null);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [cameras, setCameras] = useState([]);
+  const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const [currentStream, setCurrentStream] = useState(null);
   const [autoStartFailed, setAutoStartFailed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -31,6 +33,12 @@ export default function QRScannerPage() {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      initializeScanner();
+    }
+  }, [isMounted]);
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -150,6 +158,8 @@ export default function QRScannerPage() {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = devices.filter((d) => d.kind === 'videoinput');
 
+      setCameras(videoDevices);
+
       if (videoDevices.length === 0) {
         throw new Error('Tidak ada kamera ditemukan di device.');
       }
@@ -166,6 +176,13 @@ export default function QRScannerPage() {
 
       const cameraToUse =
         backCamera || videoDevices[videoDevices.length - 1] || videoDevices[0];
+      const selectedIndex = Math.max(
+        0,
+        videoDevices.findIndex(
+          (device) => device.deviceId === cameraToUse.deviceId
+        )
+      );
+      setCurrentCameraIndex(selectedIndex >= 0 ? selectedIndex : 0);
       console.log(
         '🎥 Using camera:',
         cameraToUse.label || cameraToUse.deviceId
@@ -180,6 +197,35 @@ export default function QRScannerPage() {
     } finally {
       setIsInitializing(false);
     }
+  };
+
+  const restartWithCamera = async (cameraIndex) => {
+    const selectedCamera = cameras[cameraIndex];
+    if (!selectedCamera) return;
+
+    setCurrentCameraIndex(cameraIndex);
+    setIsInitializing(true);
+    setCameraError(null);
+    await cleanupStreams();
+
+    try {
+      await requestCameraPermission();
+      const newScanner = new Html5Qrcode(READER_ID);
+      scannerRef.current = newScanner;
+      await startScanning(newScanner, selectedCamera.deviceId);
+    } catch (error) {
+      console.error('Swap camera error:', error);
+      setCameraError(error?.message || String(error));
+      setAutoStartFailed(true);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  const handleSwapCamera = async () => {
+    if (cameras.length <= 1) return;
+    const nextIndex = (currentCameraIndex + 1) % cameras.length;
+    await restartWithCamera(nextIndex);
   };
 
   const isValidUrl = (string) => {
@@ -382,22 +428,17 @@ export default function QRScannerPage() {
             <Image
               src="/svg/image-back.svg"
               alt="Back"
-              width={24}
-              height={24}
+              width={14}
+              height={25}
             />
           </button>
           <div className="text-white text-lg font-semibold">Scan QR Code</div>
-          <button
-            onClick={goToPanduan}
-            className="text-white bg-white rounded-full p-2"
-          >
-            <Image src="/svg/panduan.svg" alt="Guide" width={24} height={24} />
-          </button>
+          <div className="w-10 h-10" />
         </div>
       </div>
 
       {/* Bottom UI */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 p-6 bg-gradient-to-t from-black/70 to-transparent">
+      <div className="absolute bottom-0 left-0 right-0 z-10 p-6 bg-gradient-to-t from-black/80 via-black/55 to-transparent">
         <div className="text-center">
           <div className="text-white text-sm mb-4">
             Arahkan kamera ke QR code
@@ -412,22 +453,42 @@ export default function QRScannerPage() {
             </span>
           </div>
 
-          {!isScanning && !isInitializing && (
+          <div className="mx-auto flex h-16 w-full max-w-sm items-center justify-between rounded-2xl bg-white px-6 shadow-lg">
             <button
               type="button"
-              onClick={initializeScanner}
-              className="mb-4 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-black"
+              onClick={handleSwapCamera}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-transparent"
+              aria-label="Swap camera"
             >
-              {autoStartFailed ? '🔄 Coba Lagi' : '▶️ Mulai Scan'}
+              <Image
+                src="/svg/switch-camera.svg"
+                alt="Swap camera"
+                width={28}
+                height={28}
+              />
             </button>
-          )}
+
+            <button
+              type="button"
+              onClick={goToPanduan}
+              className="flex h-10 w-10 items-center justify-center rounded-full"
+              aria-label="Panduan"
+            >
+              <Image
+                src="/svg/panduan.svg"
+                alt="Panduan"
+                width={28}
+                height={28}
+              />
+            </button>
+          </div>
 
           {cameraError && (
-            <div className="text-red-400 text-sm mb-4">{cameraError}</div>
+            <div className="mt-4 text-red-400 text-sm">{cameraError}</div>
           )}
 
           {scanResult && (
-            <div className="text-green-400 text-sm">
+            <div className="mt-2 text-green-400 text-sm">
               Scan Result: {scanResult}
             </div>
           )}
