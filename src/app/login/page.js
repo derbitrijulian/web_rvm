@@ -84,15 +84,14 @@ export default function Page() {
                 </p>
               </Link>
             </label>
-
-            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent">
+            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent bg-white">
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 placeholder="Masukkan Kata Sandi"
                 value={formData.password}
                 onChange={handleChange}
-                className="text-text-primary pl-3 py-3 w-full text-sm focus:outline-none rounded-[10px]"
+                className="text-text-primary pl-3 py-3 w-full text-sm focus:outline-none rounded-[10px] bg-transparent"
               />
               <button
                 type="button"
@@ -105,21 +104,23 @@ export default function Page() {
           </div>
 
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-          <div className="grid justify-center gap-3 pt-12 pb-10">
+          <div className="mt-8 text-center">
             <button
               type="submit"
               className="py-3 bg-primary rounded-xl w-52 text-bgSecondary font-semibold text-xl"
             >
               Masuk
             </button>
-
-            <Link href="/registration">
-              <button className="py-3 bg-secondary rounded-xl w-52 text-text-primary font-semibold text-xl">
-                Daftar
-              </button>
-            </Link>
           </div>
+          <p className="text-text-primary text-[14px] text-center mt-4">
+            Tidak mempunyai akun?{' '}
+            <Link
+              href="/registration"
+              className="text-primary font-regular hover:underline"
+            >
+              Daftar
+            </Link>
+          </p>
         </form>
       </div>
     </div>

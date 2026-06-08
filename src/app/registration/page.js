@@ -63,12 +63,12 @@ export default function Page() {
   };
 
   return (
-    <div className="bg-primary pt-[34px] min-h-screen flex flex-col">
+    <div className="bg-primary pt-[34px] min-h-full flex flex-col">
       <div className="flex items-center justify-center">
         <Link href="/login" className="absolute left-8 top-[44px]">
           <Image src="/svg/image-back.svg" alt="Back" width={14} height={25} />
         </Link>
-        <h1 className="text-bgSecondary font-semibold w-full text-center text-[28px]">
+        <h1 className="text-bgSecondary font-semibold w-screen text-center text-[28px]">
           Daftar
         </h1>
       </div>
@@ -113,7 +113,7 @@ export default function Page() {
             <label className="text-text-primary text-sm font-medium">
               Kata Sandi
             </label>
-            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary">
+            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary bg-white">
               <input
                 required
                 type={showPassword ? 'text' : 'password'}
@@ -136,7 +136,7 @@ export default function Page() {
             <label className="text-text-primary text-sm font-medium">
               Konfirmasi Kata Sandi
             </label>
-            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary">
+            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary bg-white">
               <input
                 required
                 type={showConfirmPassword ? 'text' : 'password'}

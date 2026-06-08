@@ -4,6 +4,7 @@ import ClientLayout from './client-layout';
 import { LocationProvider } from '../contexts/LocationContext';
 import { UserProvider } from '../contexts/UserContextNew';
 import { InstallProvider } from '../contexts/InstallContext';
+import DeviceGuard from '../components/DeviceGuard';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -46,15 +47,17 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${poppins.className} `}>
-        <InstallProvider>
-          <LocationProvider>
-            <UserProvider>
-              <ClientLayout>
-                <main>{children}</main>
-              </ClientLayout>
-            </UserProvider>
-          </LocationProvider>
-        </InstallProvider>
+        <DeviceGuard>
+          <InstallProvider>
+            <LocationProvider>
+              <UserProvider>
+                <ClientLayout>
+                  <main>{children}</main>
+                </ClientLayout>
+              </UserProvider>
+            </LocationProvider>
+          </InstallProvider>
+        </DeviceGuard>
       </body>
     </html>
   );
