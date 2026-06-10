@@ -6,6 +6,7 @@ import { useFetch } from '@/hooks/use-fetch';
 import dynamic from 'next/dynamic';
 import { useLocation } from '@/contexts/LocationContext';
 import InstallButton from '@/components/InstallButton';
+import OnboardingTour from '@/components/OnboardingTour';
 
 // Simple client-side carousel component
 function NewsCarousel({ images }) {
@@ -251,6 +252,7 @@ export default function Page() {
 
   return (
     <div className="bg-primary h-full">
+      <OnboardingTour />
       {/* Header */}
       <div className="px-8 pt-7">
         <div className="flex justify-between items-center">
@@ -271,7 +273,7 @@ export default function Page() {
           </div>
           <div className="flex items-center gap-3">
             <InstallButton />
-            <Link href="/notifikasi">
+            <Link href="/notifikasi" data-tour="notification">
               <Image
                 src="/svg/Notification.svg"
                 alt="notification"

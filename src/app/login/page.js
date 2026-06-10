@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { loginUser } from '../../services/auth-service';
+import { useUserContext } from '../../contexts/UserContextNew';
 
 export default function Page() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ export default function Page() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const { refreshUserData } = useUserContext();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,6 +38,11 @@ export default function Page() {
 
     try {
       await loginUser(email, password);
+
+      console.log('🔄 Refreshing user data after login...');
+      refreshUserData();
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       router.push('/home');
     } catch (error) {

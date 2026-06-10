@@ -44,7 +44,7 @@ export default function Navbar() {
           </li>
         </Link>
 
-        <Link href="/lokasi">
+        <Link href="/lokasi" data-tour="location">
           <li
             className={`flex flex-col items-center ${
               isActive('/lokasi') ? 'text-primary' : 'text-black'
@@ -102,7 +102,7 @@ export default function Navbar() {
             )}
           </li>
         ) : (
-          <Link href="/qr">
+          <Link href="/qr" data-tour="scan">
             <li className="flex flex-col items-center -translate-y-9 ">
               <div className="rounded-full p-6 bg-primary mb-2 ">
                 <Image
@@ -117,7 +117,7 @@ export default function Navbar() {
           </Link>
         )}
 
-        <Link href="/aktifitas">
+        <Link href="/aktifitas" data-tour="activities">
           <li
             className={`flex flex-col items-center ${
               isActive('/aktifitas') ? 'text-primary' : 'text-black'
@@ -126,11 +126,11 @@ export default function Navbar() {
             <div className="pb-1">
               <FiActivity className="w-6 h-6" />
             </div>
-            <span className="text-xs font-medium">Aktifitas</span>
+            <span className="text-xs font-medium">Aktivitas</span>
           </li>
         </Link>
 
-        <Link href="/profil">
+        <Link href="/profil" data-tour="profile">
           <li
             className={`flex flex-col items-center ${
               isActive('/profil') ? 'text-primary' : 'text-black'
