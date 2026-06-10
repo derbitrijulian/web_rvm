@@ -204,7 +204,7 @@ export default function OnboardingTour() {
             <h2 className="text-xl font-semibold text-center text-text-primary mb-2">
               Selamat Datang!
             </h2>
-            <p className="text-center text-text-secondary mb-6 text-sm">
+            <p className="text-center text-text-primary mb-6 text-sm">
               Apakah anda membutuhkan intruksi terkait aplikasi?
             </p>
             <div className="flex gap-3">
@@ -255,7 +255,7 @@ export default function OnboardingTour() {
                 <h3 className="font-semibold text-text-primary text-base">
                   {steps[currentStep].title}
                 </h3>
-                <p className="text-text-secondary text-xs mt-1">
+                <p className="text-text-primary text-xs mt-1">
                   {steps[currentStep].description}
                 </p>
               </div>
