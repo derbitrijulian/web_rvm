@@ -4,8 +4,11 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { registerUser } from '../../services/auth-service';
+import AuthDialog from '../../components/ui/auth-dialog';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -19,6 +22,8 @@ export default function Page() {
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogType, setDialogType] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,24 +35,39 @@ export default function Page() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('🔍 Form submitted, validating...');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Password do not match');
+      console.log('❌ Password mismatch, showing dialog');
+      setDialogType('invalidData');
+      setShowDialog(true);
       return;
     }
 
     if (!checked) {
-      setError('You must agree to the terms and conditions');
+      console.log('❌ Checkbox not checked, showing dialog');
+      setDialogType('invalidData');
+      setShowDialog(true);
+      return;
+    }
+
+    if (!formData.fullName || !formData.email || !formData.password || !formData.phone) {
+      console.log('❌ Empty fields detected, showing dialog');
+      setDialogType('invalidData');
+      setShowDialog(true);
       return;
     }
 
     try {
+      console.log('✅ Validation passed, calling API...');
       setError('');
       setSuccess('');
 
       const response = await registerUser(formData);
-      console.log(response);
-      setSuccess(response.message || 'Registrasi Berhasil!!');
+      console.log('✅ Registration successful:', response);
+      
+      setDialogType('registrationSuccess');
+      setShowDialog(true);
 
       setFormData({
         fullName: '',
@@ -58,7 +78,9 @@ export default function Page() {
       });
       setChecked(false);
     } catch (error) {
-      setError(error.message);
+      console.log('❌ Registration failed:', error.message);
+      setDialogType('invalidData');
+      setShowDialog(true);
     }
   };
 
@@ -170,7 +192,7 @@ export default function Page() {
               placeholder="Masukkan No Hp"
               value={formData.phone}
               onChange={handleChange}
-              className="mt-2 pl-3 pr-3 w-full p-3 border-[3px] border-secondary rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="mt-2 pl-3 pr-3 w-full p-3 border-[3px] border-secondary rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary text-text-primary"
             />
           </div>
 
@@ -203,6 +225,13 @@ export default function Page() {
           {success && <p className="text-green-500 text-sm">{success}</p>}
         </div>
       </form>
+      {showDialog && (
+        <AuthDialog
+          type={dialogType}
+          onClose={() => setShowDialog(false)}
+          onNavigate={() => router.push('/login')}
+        />
+      )}
     </div>
   );
 }

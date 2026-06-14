@@ -3,9 +3,11 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useUserContext } from '../contexts/UserContextNew';
 
 export default function GoogleLoginButton({ className = '' }) {
   const router = useRouter();
+  const { refreshUserData } = useUserContext();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -52,10 +54,12 @@ export default function GoogleLoginButton({ className = '' }) {
 
       console.log('✅ Google auth success, redirecting...');
 
-      // Redirect ke home
-      setTimeout(() => {
-        router.push('/home');
-      }, 500);
+      console.log('🔄 Refreshing user data after Google login...');
+      refreshUserData();
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      router.push('/home');
     } catch (err) {
       console.error('❌ Google login error:', err);
       setError('Terjadi kesalahan: ' + err.message);

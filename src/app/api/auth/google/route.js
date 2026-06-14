@@ -71,6 +71,8 @@ export async function POST(req) {
       where: { googleId },
     });
 
+    let isNewUser = false;
+
     // Jika belum ada, cek apakah email sudah terdaftar
     if (!user) {
       console.log('🔍 User not found by googleId, checking email:', email);
@@ -98,7 +100,7 @@ export async function POST(req) {
           nama: name || 'Google User',
           googleId,
           isGoogleAuth: true,
-          password: null, // Google auth users tidak punya password
+          password: null,
         },
       });
 
@@ -110,6 +112,7 @@ export async function POST(req) {
         },
       });
 
+      isNewUser = true;
       console.log('✅ New user created:', user.id);
     } else if (!user.isGoogleAuth) {
       // Update user yang sudah ada untuk enable Google Auth
@@ -137,6 +140,7 @@ export async function POST(req) {
     const response = NextResponse.json(
       {
         message: 'Login Google berhasil',
+        isNewUser,
         user: {
           id: user.id,
           email: user.email,

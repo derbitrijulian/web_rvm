@@ -10,7 +10,7 @@ export const loginUser = async (email, password) => {
 
     if (!response.ok) {
       const data = await response.json();
-      throw new Error(data.error || 'Login failed');
+      throw new Error(data.message || 'Login failed');
     }
 
     return await response.json();
@@ -31,7 +31,7 @@ export const registerUser = async (formData) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || 'Registrasi Gagal.');
+      throw new Error(errorData.message || 'Registrasi Gagal.');
     }
 
     return await response.json();

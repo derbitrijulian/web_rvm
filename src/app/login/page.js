@@ -6,6 +6,11 @@ import { useRouter } from 'next/navigation';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { loginUser } from '../../services/auth-service';
 import { useUserContext } from '../../contexts/UserContextNew';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import GoogleLoginButton from '../../components/GoogleLoginButton';
+import AuthDialog from '../../components/ui/auth-dialog';
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 export default function Page() {
   const [formData, setFormData] = useState({
@@ -15,6 +20,8 @@ export default function Page() {
 
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogType, setDialogType] = useState('');
   const router = useRouter();
   const { refreshUserData } = useUserContext();
 
@@ -37,6 +44,7 @@ export default function Page() {
     }
 
     try {
+      console.log('🔍 Attempting login...');
       await loginUser(email, password);
 
       console.log('🔄 Refreshing user data after login...');
@@ -44,92 +52,119 @@ export default function Page() {
       
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      console.log('✅ Login successful, redirecting to home...');
       router.push('/home');
     } catch (error) {
-      setError('Email atau kata sandi salah!');
+      console.log('❌ Login error:', error.message);
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('tidak ditemukan')) {
+        console.log('📧 Email not found, showing dialog');
+        setDialogType('emailNotFound');
+        setShowDialog(true);
+      } else {
+        console.log('🔑 Wrong credentials, showing error message');
+        setError('Email atau kata sandi salah!');
+      }
     }
   };
 
   return (
-    <div className="bg-primary h-screen pt-[35px] flex flex-col">
-      <div className="flex items-center justify-center">
-        <Link href="/onboarding" className="absolute left-8 top-[44px]">
-          <Image src="/svg/image-back.svg" alt="Back" width={14} height={25} />
-        </Link>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID || ''}>
+      <div className="bg-primary h-screen pt-[35px] flex flex-col">
+        <div className="flex items-center justify-center">
+          <Link href="/onboarding" className="absolute left-8 top-[44px]">
+            <Image src="/svg/image-back.svg" alt="Back" width={14} height={25} />
+          </Link>
 
-        <h1 className="text-bgSecondary font-semibold w-full text-center text-[28px]">
-          Selamat Datang
-        </h1>
-      </div>
+          <h1 className="text-bgSecondary font-semibold w-full text-center text-[28px]">
+            Selamat Datang
+          </h1>
+        </div>
 
-      <p className="text-bgSecondary text-sm font-regular text-center text-[12px] pt-1 pb-4 pl-20 pr-20">
-        Silahkan masuk atau daftar jika belum mempunyai akun.
-      </p>
+        <p className="text-bgSecondary text-sm font-regular text-center text-[12px] pt-1 pb-4 pl-20 pr-20">
+          Silahkan masuk atau daftar jika belum mempunyai akun.
+        </p>
 
-      <div className="bg-bgSecondary rounded-t-[36px] pt-20 px-9 flex-1">
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label className="text-text-primary text-sm font-medium text-[15px]">
-              Nama Pengguna atau Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Masukkan Email"
-              value={formData.email}
-              onChange={handleChange}
-              className="text-text-primary mt-2 pl-3 pr-3 w-full p-3 border-[3px] border-secondary rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
-
-          <div className="mt-6">
-            <label className="text-text-primary text-sm font-medium text-[15px] flex justify-between">
-              <span>Kata Sandi</span>
-              <Link href="/forgot-password">
-                <p className="text-primary text-[12px] cursor-pointer hover:underline">
-                  Lupa Password?
-                </p>
-              </Link>
-            </label>
-            <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent bg-white">
+        <div className="bg-bgSecondary rounded-t-[36px] pt-20 px-9 flex-1">
+          <form onSubmit={handleSubmit}>
+            <div>
+              <label className="text-text-primary text-sm font-medium text-[15px]">
+                Nama Pengguna atau Email
+              </label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                placeholder="Masukkan Kata Sandi"
-                value={formData.password}
+                type="email"
+                name="email"
+                placeholder="Masukkan Email"
+                value={formData.email}
                 onChange={handleChange}
-                className="text-text-primary pl-3 py-3 w-full text-sm focus:outline-none rounded-[10px] bg-transparent"
+                className="text-text-primary mt-2 pl-3 pr-3 w-full p-3 border-[3px] border-secondary rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
+            </div>
+
+            <div className="mt-6">
+              <label className="text-text-primary text-sm font-medium text-[15px] flex justify-between">
+                <span>Kata Sandi</span>
+                <Link href="/forgot-password">
+                  <p className="text-primary text-[12px] cursor-pointer hover:underline">
+                    Lupa Password?
+                  </p>
+                </Link>
+              </label>
+              <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent bg-white">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  placeholder="Masukkan Kata Sandi"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="text-text-primary pl-3 py-3 w-full text-sm focus:outline-none rounded-[10px] bg-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="pr-3 text-text-primary hover:text-primary transition-colors flex-shrink-0"
+                >
+                  {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
+                </button>
+              </div>
+            </div>
+
+            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+            <div className="mt-8 text-center">
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="pr-3 text-text-primary hover:text-primary transition-colors flex-shrink-0"
+                type="submit"
+                className="py-3 bg-primary rounded-xl w-52 text-bgSecondary font-semibold text-xl"
               >
-                {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
+                Masuk
               </button>
             </div>
-          </div>
-
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-          <div className="mt-8 text-center">
-            <button
-              type="submit"
-              className="py-3 bg-primary rounded-xl w-52 text-bgSecondary font-semibold text-xl"
-            >
-              Masuk
-            </button>
-          </div>
-          <p className="text-text-primary text-[14px] text-center mt-4">
-            Tidak mempunyai akun?{' '}
-            <Link
-              href="/registration"
-              className="text-primary font-regular hover:underline"
-            >
-              Daftar
-            </Link>
-          </p>
-        </form>
+            <p className="text-text-primary text-[14px] text-center mt-4">
+              Tidak mempunyai akun?{' '}
+              <Link
+                href="/registration"
+                className="text-primary font-regular hover:underline"
+              >
+                Daftar
+              </Link>
+            </p>
+            <div className="flex flex-col items-center w-full gap-3 mt-4">
+              {GOOGLE_CLIENT_ID ? (
+                <GoogleLoginButton />
+              ) : (
+                <div className="text-red-500 text-sm text-center py-3 px-6 bg-red-50 rounded-xl max-w-sm">
+                  ⚠️ Google Client ID tidak tersedia. Periksa file .env
+                </div>
+              )}
+            </div>
+          </form>
+        </div>
+        {showDialog && (
+          <AuthDialog
+            type={dialogType}
+            onClose={() => setShowDialog(false)}
+          />
+        )}
       </div>
-    </div>
+    </GoogleOAuthProvider>
   );
 }

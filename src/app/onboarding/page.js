@@ -46,15 +46,6 @@ export default function onboardingPage() {
             </button>
           </Link>
         </div>
-        <div className="flex flex-col items-center w-full gap-3 px-4 mt-10">
-          {GOOGLE_CLIENT_ID ? (
-            <GoogleLoginButton />
-          ) : (
-            <div className="text-red-500 text-sm text-center py-3 px-6 bg-red-50 rounded-xl max-w-sm">
-              ⚠️ Google Client ID tidak tersedia. Periksa file .env
-            </div>
-          )}
-        </div>
       </div>
     </GoogleOAuthProvider>
   );
