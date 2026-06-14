@@ -42,7 +42,7 @@ export default function AuthDialog({ type, onClose, onNavigate }) {
             </span>
           </div>
 
-          <h2 className="text-poppins text-lg font-bold text-gray-800 text-center mb-3">
+          <h2 className="text-lg font-bold text-gray-800 text-center mb-3">
             {config.title}
           </h2>
 
@@ -52,7 +52,7 @@ export default function AuthDialog({ type, onClose, onNavigate }) {
 
           <button
             onClick={config.buttonAction}
-            className="w-full py-3 bg-primary text-white text-base font-medium rounded-lg hover:bg-[#0096b8] transition-colors"
+            className="w-full py-3 bg-primary text-white text-base font-medium rounded-lg hover:bg-primary transition-colors"
           >
             {config.buttonText}
           </button>

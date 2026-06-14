@@ -51,7 +51,12 @@ export default function Page() {
       return;
     }
 
-    if (!formData.fullName || !formData.email || !formData.password || !formData.phone) {
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.password ||
+      !formData.phone
+    ) {
       console.log('❌ Empty fields detected, showing dialog');
       setDialogType('invalidData');
       setShowDialog(true);
@@ -65,7 +70,7 @@ export default function Page() {
 
       const response = await registerUser(formData);
       console.log('✅ Registration successful:', response);
-      
+
       setDialogType('registrationSuccess');
       setShowDialog(true);
 
@@ -98,13 +103,13 @@ export default function Page() {
         Silahkan isi form untuk bergabung
       </p>
       <form onSubmit={handleSubmit}>
-        <div className="bg-bgSecondary rounded-t-[36px] pt-20 px-9 flex-1">
+        <div className="bg-bgSecondary h-[745px] rounded-t-[36px] pt-20 px-9">
           <div>
             <label
               className="text-text-primary text-sm font-medium"
               htmlFor="fullName"
             >
-              Nama Lengkap
+              Nama Lengkap <span className="text-red-500">*</span>
             </label>
             <input
               required
@@ -119,7 +124,7 @@ export default function Page() {
           </div>
           <div className="mt-3">
             <label className="text-text-primary text-sm font-medium">
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               required
@@ -133,7 +138,7 @@ export default function Page() {
           </div>
           <div className="mt-3">
             <label className="text-text-primary text-sm font-medium">
-              Kata Sandi
+              Kata Sandi <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary bg-white">
               <input
@@ -156,7 +161,7 @@ export default function Page() {
           </div>
           <div className="mt-3">
             <label className="text-text-primary text-sm font-medium">
-              Konfirmasi Kata Sandi
+              Konfirmasi Kata Sandi <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center mt-2 border-[3px] border-secondary rounded-[10px] focus-within:ring-2 focus-within:ring-primary bg-white">
               <input
@@ -183,7 +188,7 @@ export default function Page() {
           </div>
           <div className="mt-3">
             <label className="text-text-primary text-sm font-medium">
-              Nomor Hp
+              Nomor Hp <span className="text-red-500">*</span>
             </label>
             <input
               required
@@ -197,7 +202,7 @@ export default function Page() {
           </div>
 
           <p className="text-xs pt-2 text-red-500">*Tanda Kolom Wajib Diisi</p>
-          <div className="flex items-start gap-5 px-6 mt-3">
+          <div className="flex items-start gap-5 mt-3">
             <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
@@ -206,9 +211,19 @@ export default function Page() {
                 className="peer h- w-5 cursor-pointer rounded border border-gray-300 checked:bg-primary"
               />
               <span className="ml-2 text-xs text-text-primary">
-                Saya menyetujui{' '}
-                <Link href="/syarat-ketentuan?callback=/registration">
+                Setuju dengan{' '}
+                <Link
+                  href="/syarat-ketentuan?callback=/registration"
+                  className="text-primary hover:underline"
+                >
                   Syarat dan Ketentuan
+                </Link>{' '}
+                serta{' '}
+                <Link
+                  href="/kebijakan-privasi?callback=/registration"
+                  className="text-primary hover:underline"
+                >
+                  Kebijakan Privasi
                 </Link>
               </span>
             </label>
@@ -221,6 +236,15 @@ export default function Page() {
               Daftar
             </button>
           </div>
+          <p className="text-text-primary font-regular text-xs text-center my-2">
+            Sudah Punya Akun?{' '}
+            <Link
+              href="/login"
+              className="text-primary text-xs font-regular hover:underline"
+            >
+              Masuk
+            </Link>
+          </p>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           {success && <p className="text-green-500 text-sm">{success}</p>}
         </div>
