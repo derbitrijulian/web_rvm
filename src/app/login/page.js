@@ -49,8 +49,8 @@ export default function Page() {
 
       console.log('🔄 Refreshing user data after login...');
       refreshUserData();
-      
-      await new Promise(resolve => setTimeout(resolve, 500));
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       console.log('✅ Login successful, redirecting to home...');
       router.push('/home');
@@ -73,7 +73,12 @@ export default function Page() {
       <div className="bg-primary h-screen pt-[35px] flex flex-col">
         <div className="flex items-center justify-center">
           <Link href="/onboarding" className="absolute left-8 top-[44px]">
-            <Image src="/svg/image-back.svg" alt="Back" width={14} height={25} />
+            <Image
+              src="/svg/image-back.svg"
+              alt="Back"
+              width={14}
+              height={25}
+            />
           </Link>
 
           <h1 className="text-bgSecondary font-semibold w-full text-center text-[28px]">
@@ -159,10 +164,7 @@ export default function Page() {
           </form>
         </div>
         {showDialog && (
-          <AuthDialog
-            type={dialogType}
-            onClose={() => setShowDialog(false)}
-          />
+          <AuthDialog type={dialogType} onClose={() => setShowDialog(false)} />
         )}
       </div>
     </GoogleOAuthProvider>
