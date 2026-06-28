@@ -86,6 +86,7 @@ export async function GET(req) {
           email: userWithoutPassword.email,
           nama: userWithoutPassword.nama,
           phoneNumber: userWithoutPassword.phoneNumber,
+          password: !!password,
           createdAt: userWithoutPassword.createdAt,
           updatedAt: userWithoutPassword.updatedAt,
           bottleCount: userWithoutPassword.bottleCount,

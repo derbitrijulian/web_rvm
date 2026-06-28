@@ -26,6 +26,14 @@ export default function AuthDialog({ type, onClose, onNavigate }) {
       buttonText: 'Ke Halaman Login',
       buttonAction: onNavigate || onClose,
     },
+    oauthUserInfo: {
+      icon: 'ℹ',
+      iconBg: 'bg-blue-500',
+      title: 'Informasi',
+      message: 'Anda login menggunakan Google OAuth. Anda dapat membuat password untuk login menggunakan email dan password.',
+      buttonText: 'Mengerti',
+      buttonAction: onClose,
+    },
   };
 
   const config = configs[type] || configs.invalidData;

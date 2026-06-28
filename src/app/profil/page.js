@@ -151,7 +151,7 @@ export default function ProfilePage() {
             <div className="grid gap-y-7 text-center w-full mt-10">
               <OptionItem
                 icon="/svg/icon-password.svg"
-                text="Ubah Kata Sandi"
+                text={userDetail?.password ? "Ubah Kata Sandi" : "Buat Kata Sandi"}
                 href="/new-password"
               />
               <OptionItem

@@ -1,5 +1,6 @@
 import prisma from '../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
@@ -27,27 +28,27 @@ export async function POST(req) {
       );
     }
 
-    // Cari user berdasarkan reset token
-    const user = await prisma.user.findUnique({
-      where: { resetPasswordToken: token },
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    const user = await prisma.user.findFirst({
+      where: {
+        resetPasswordToken: hashedToken,
+        resetPasswordTokenExpiry: {
+          gt: new Date(),
+        },
+      },
     });
 
     if (!user) {
       return NextResponse.json(
-        { message: 'Token reset password tidak valid' },
+        { message: 'Token reset password tidak valid atau sudah kadaluarsa' },
         { status: 400 }
       );
     }
 
-    // Cek apakah token sudah expired
-    if (user.resetPasswordTokenExpiry < new Date()) {
-      return NextResponse.json(
-        { message: 'Token reset password sudah expired. Silakan request reset password lagi.' },
-        { status: 400 }
-      );
-    }
-
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Update password dan clear reset token

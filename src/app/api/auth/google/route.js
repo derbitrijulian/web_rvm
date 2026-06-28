@@ -81,15 +81,27 @@ export async function POST(req) {
       });
 
       if (existingUserByEmail) {
-        console.warn('⚠️ Email already registered with different account');
-        return NextResponse.json(
-          {
-            error:
-              'Email sudah terdaftar dengan akun lain. Silahkan gunakan akun yang sudah ada atau email lain.',
-            existingUser: true,
+        if (existingUserByEmail.googleId && existingUserByEmail.googleId !== googleId) {
+          console.warn('⚠️ Email already linked to different Google account');
+          return NextResponse.json(
+            {
+              error:
+                'Email sudah terhubung dengan akun Google lain.',
+              existingUser: true,
+            },
+            { status: 400 }
+          );
+        }
+        
+        console.log('🔗 Linking Google account to existing user');
+        user = await prisma.user.update({
+          where: { id: existingUserByEmail.id },
+          data: {
+            googleId,
+            isGoogleAuth: true,
           },
-          { status: 400 }
-        );
+        });
+        console.log('✅ Google account linked successfully');
       }
 
       // Buat user baru
