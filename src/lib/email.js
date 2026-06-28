@@ -1,18 +1,10 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendPasswordResetEmail(email, resetLink) {
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
+  const { data, error } = await resend.emails.send({
+    from: 'Plastic-In Support <onboarding@resend.dev>',
     to: email,
     subject: 'Reset Password - RVM',
     html: `
@@ -89,24 +81,28 @@ export async function sendPasswordResetEmail(email, resetLink) {
       </html>
     `,
     text: `
-      Reset Password - RVM
-      
-      Halo,
-      
-      Anda menerima email ini karena ada permintaan untuk reset password akun Anda.
-      
-      Klik link berikut untuk reset password Anda:
-      ${resetLink}
-      
-      Link ini akan kadaluarsa dalam 1 jam.
-      
-      Jika Anda tidak meminta reset password, abaikan email ini dan password Anda tidak akan berubah.
-      
-      Email ini dikirim secara otomatis, mohon tidak membalas email ini.
-      
-      © 2026 RVM. All rights reserved.
-    `,
-  };
+Reset Password - RVM
 
-  await transporter.sendMail(mailOptions);
+Halo,
+
+Anda menerima email ini karena ada permintaan untuk reset password akun Anda.
+
+Klik link berikut untuk reset password Anda:
+${resetLink}
+
+Link ini akan kadaluarsa dalam 1 jam.
+
+Jika Anda tidak meminta reset password, abaikan email ini dan password Anda tidak akan berubah.
+
+Email ini dikirim secara otomatis, mohon tidak membalas email ini.
+
+© 2026 RVM. All rights reserved.
+    `,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }
