@@ -82,7 +82,7 @@ export default function ForgotAndNewPassword({ title, children }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Masukkan Alamat Email"
-            className="mt-2 pl-3 pr-3 w-full p-3 border-[3px] border-secondary rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="mt-2 pl-3 pr-3 w-full p-3 border-[3px] text-text-primary border-secondary rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
 
