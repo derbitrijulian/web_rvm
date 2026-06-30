@@ -33,6 +33,11 @@ export async function POST(req) {
       .update(token)
       .digest('hex');
 
+    console.log('🔍 Reset Password Debug:');
+    console.log('Token received (first 10 chars):', token.substring(0, 10));
+    console.log('Hashed token (first 10 chars):', hashedToken.substring(0, 10));
+    console.log('Current server time:', new Date().toISOString());
+
     const user = await prisma.user.findFirst({
       where: {
         resetPasswordToken: hashedToken,
@@ -43,11 +48,35 @@ export async function POST(req) {
     });
 
     if (!user) {
+      const userWithToken = await prisma.user.findFirst({
+        where: { resetPasswordToken: hashedToken },
+        select: { 
+          email: true, 
+          resetPasswordToken: true, 
+          resetPasswordTokenExpiry: true 
+        },
+      });
+
+      console.log('❌ User not found with valid token');
+      if (userWithToken) {
+        console.log('⚠️  Token exists but expired');
+        console.log('Token expiry:', userWithToken.resetPasswordTokenExpiry?.toISOString());
+        console.log('Current time:', new Date().toISOString());
+        const diff = userWithToken.resetPasswordTokenExpiry 
+          ? (userWithToken.resetPasswordTokenExpiry.getTime() - new Date().getTime()) / 1000 / 60
+          : 0;
+        console.log('Time difference (minutes):', diff);
+      } else {
+        console.log('⚠️  Token does not exist in database');
+      }
+
       return NextResponse.json(
         { message: 'Token reset password tidak valid atau sudah kadaluarsa' },
         { status: 400 }
       );
     }
+
+    console.log('✅ Valid token found for user:', user.email);
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 

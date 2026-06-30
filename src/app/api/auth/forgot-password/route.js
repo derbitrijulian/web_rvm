@@ -32,7 +32,7 @@ export async function POST(req) {
       .digest('hex');
 
     const tokenExpiry = new Date();
-    tokenExpiry.setHours(tokenExpiry.getHours() + 1);
+    tokenExpiry.setHours(tokenExpiry.getHours() + 2);
 
     await prisma.user.update({
       where: { id: user.id },
