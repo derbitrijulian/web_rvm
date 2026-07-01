@@ -82,6 +82,33 @@ export default function RedeemGopayPage() {
     }
   };
 
+  // Auto-create session when page loads
+  useEffect(() => {
+    const createSession = async () => {
+      try {
+        const response = await fetch('/api/sessions/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            deviceId: 'RVM-LAB-001',
+            expiresInMinutes: 5
+          })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          console.log('✅ Session created:', result.data.sessionId);
+        } else {
+          console.error('❌ Failed to create session:', result.error);
+        }
+      } catch (error) {
+        console.error('❌ Error creating session:', error);
+      }
+    };
+    
+    createSession();
+  }, []);
+
   // Extract data with safe defaults - Updated for new 2-stage flow
   const bottleData = data?.bottleData || {};
   const bottleCount =

@@ -220,3 +220,15 @@ model SystemConfig {
 
   @@map("system_configs")
 }
+
+model ArduinoSession {
+  id        String   @id @default(uuid())
+  deviceId  String   
+  userId    String   
+  expiresAt DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  
+  @@index([deviceId, isActive])
+  @@map("arduino_sessions")
+}
