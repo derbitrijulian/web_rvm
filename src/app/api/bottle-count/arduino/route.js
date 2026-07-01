@@ -7,6 +7,14 @@ const prisma = new PrismaClient();
 export async function POST(request) {
   try {
     console.log('=== Arduino Bottle API Called ===');
+    
+    // VALIDASI API KEY
+    const apiKey = request.headers.get('x-api-key');
+    if (apiKey !== process.env.ARDUINO_API_KEY) {
+      console.error('❌ Unauthorized: Invalid API Key');
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+
     console.log('⏰ Timestamp:', new Date().toISOString());
 
     let body;
@@ -76,25 +84,89 @@ export async function POST(request) {
 
     console.log('✅ Valid location ID found:', parsedData.rvmLocationId);
 
-    // Create bottle detection record
-    const newRecord = await prisma.bottleCount.create({
-      data: {
-        deviceId: parsedData.deviceId,
-        count: parsedData.bottleCount,
-        distance: parsedData.distance,
-        source: 'arduino',
-        timestamp: new Date(),
-      },
-    });
-
+    let newRecord;
+    
+    if (parsedData.userId) {
+      console.log('👤 User ID provided - direct assignment mode');
+      
+      let userBottleCount = await prisma.userBottleCount.findUnique({
+        where: { userId: parsedData.userId }
+      });
+      
+      if (!userBottleCount) {
+        userBottleCount = await prisma.userBottleCount.create({
+          data: {
+            userId: parsedData.userId,
+            totalBottles: 0,
+            redeemableCount: 0,
+            lifetimeCount: 0,
+            points: 0,
+            lifetimePoints: 0
+          }
+        });
+      }
+      
+      newRecord = await prisma.bottleCount.create({
+        data: {
+          deviceId: parsedData.deviceId,
+          count: parsedData.bottleCount,
+          distance: parsedData.distance,
+          source: 'arduino',
+          timestamp: new Date(),
+          userBottleCountId: userBottleCount.id
+        }
+      });
+      
+      const pointsPerBottle = 50;
+      const pointsEarned = parsedData.bottleCount * pointsPerBottle;
+      
+      await prisma.userBottleCount.update({
+        where: { id: userBottleCount.id },
+        data: {
+          totalBottles: { increment: parsedData.bottleCount },
+          redeemableCount: { increment: parsedData.bottleCount },
+          lifetimeCount: { increment: parsedData.bottleCount },
+          points: { increment: pointsEarned },
+          lifetimePoints: { increment: pointsEarned }
+        }
+      });
+      
+      await prisma.bottleTransaction.create({
+        data: {
+          userBottleCountId: userBottleCount.id,
+          deviceId: parsedData.deviceId,
+          locationId: parsedData.rvmLocationId,
+          transactionType: 'DEPOSIT',
+          bottleCount: parsedData.bottleCount,
+          pointsEarned: pointsEarned,
+          timestamp: new Date()
+        }
+      });
+      
+      console.log('✅ Bottle assigned to user:', parsedData.userId);
+      console.log('💰 Points earned:', pointsEarned);
+      
+    } else {
+      newRecord = await prisma.bottleCount.create({
+        data: {
+          deviceId: parsedData.deviceId,
+          count: parsedData.bottleCount,
+          distance: parsedData.distance,
+          source: 'arduino',
+          timestamp: new Date(),
+        }
+      });
+      
+      console.log('📝 Bottle saved as unclaimed (for BottleIn)');
+    }
+    
     console.log('✅ Bottle detection recorded:', {
       deviceId: parsedData.deviceId,
       count: parsedData.bottleCount,
       distance: parsedData.distance,
       id: newRecord.id,
+      assignedToUser: !!parsedData.userId
     });
-
-    console.log('📝 Bottle detection recorded for BottleIn display');
 
     // Calculate total unclaimed bottles
     const totalUnclaimedBottles = await prisma.bottleCount.aggregate({
